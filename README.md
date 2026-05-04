@@ -1,1 +1,7 @@
-<iframe width="1885" height="957" src="https://www.youtube.com/embed/2MS9tUq9cxE" title="Dashboard de control de gasto de máquinas en producción alimentaria | Demo con datos simulados" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+# Dashboard de control de gasto de máquinas
+
+<a href="https://www.youtube.com/watch?v=2MS9tUq9xcE">
+  <img src="./panel-gasto-maquinas.png" alt="Ver vídeo del dashboard de gasto de máquinas" width="900">
+</a>
+
+[Ver vídeo en YouTube](https://www.youtube.com/watch?v=2MS9tUq9xcE)
