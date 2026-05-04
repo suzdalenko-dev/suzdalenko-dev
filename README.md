@@ -1,1 +1,1 @@
-<video src="./scada.mp4" width="900" controls></video>
+<iframe width="1885" height="957" src="https://www.youtube.com/embed/2MS9tUq9cxE" title="Dashboard de control de gasto de máquinas en producción alimentaria | Demo con datos simulados" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
