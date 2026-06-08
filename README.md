@@ -4,6 +4,9 @@
   <img src="https://suzdalenko-dev.github.io/suzdalenko-dev/1.0-Ritmo-Produccion/ritmo-produccion-industrial.png" alt="Monitor de Ritmo de Producción | Suzdalenko Programación IA | Cantabria Santander | Automatización en la industria" width="900">
 </a>
 
+
+
+
 ###
 ###
 ### Dashboard de control de gasto de máquinas
