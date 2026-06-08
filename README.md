@@ -6,6 +6,7 @@
 
 <br>
 <br>
+<br>
 
 ### Dashboard de control de gasto de máquinas
 
