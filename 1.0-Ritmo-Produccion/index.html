@@ -1,0 +1,476 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo · Ritmo de producción</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #0f172a;
+      background: #f1f5f9;
+      min-height: 100vh;
+    }
+    .bi-wrap { width: 100%; min-height: 100vh; padding: 8px; display: flex; flex-direction: column; gap: 10px; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 14px;
+      padding: 10px 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #2563eb; }
+    h1 { margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+    .sub { font-size: 11px; color: #0f172a; margin-top: 2px; }
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+    .filters label {
+      display: flex; flex-direction: column; gap: 3px; font-size: 10px; letter-spacing: .08em;
+      text-transform: uppercase; color: #64748b; font-weight: 700;
+    }
+    .filters select, .filters input[type=number] {
+      padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;
+      font-size: 13px; color: #0f172a; font-family: inherit; outline: none; min-width: 105px;
+    }
+    .filters input[type=number] { width: 92px; }
+    .filters select.wide { min-width: 500px; max-width: 760px; }
+    .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+    .kpi { padding: 14px 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+    .kpi .label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #64748b; font-weight: 800; }
+    .kpi .val { font-size: 26px; font-weight: 900; letter-spacing: -.03em; margin-top: 6px; color: #0f172a; }
+    .kpi.accent .val { color: #063fbb; }
+    .kpi-compare-main { display: flex; align-items: baseline; gap: 6px; font-size: 24px; font-weight: 950; color: #020617; line-height: 1.05; white-space: nowrap; }
+    .kpi-unit { font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; }
+    .kpi-diff { margin-left: 6px; padding: 3px 7px; border-radius: 999px; font-size: 12px; font-weight: 900; line-height: 1; }
+    .kpi-diff-positive { color: #15803d; background: rgba(34,197,94,.13); }
+    .kpi-diff-negative { color: #b91c1c; background: rgba(239,68,68,.13); }
+    .kpi-diff-neutral { color: #475569; background: rgba(100,116,139,.13); }
+    .kpi-compare-sub { margin-top: 5px; font-size: 11px; font-weight: 700; color: #64748b; }
+    .grid { display: grid; grid-template-columns: 7fr 1.82fr; gap: 10px; flex: 1 1 auto; min-height: 360px; }
+    .grid-bottom { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 10px; align-items: stretch; }
+    .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; min-height: 0; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 12px; }
+    .panel-head h2 { margin: 0; font-size: 13px; font-weight: 800; color: #0f172a; letter-spacing: -.01em; }
+    .meta { font-size: 11px; color: #94a3b8; text-align: right; }
+    .chart { flex: 1 1 auto; width: 100%; min-height: 320px; }
+    .grid-bottom > .panel { height: 230px; min-height: 0; padding: 10px 12px; }
+    .grid-bottom .chart { height: 175px; min-height: 0; flex: 0 0 175px; }
+    .head-controls select { padding: 4px 7px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-size: 10px; color: #475569; }
+    .top-list { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; max-height: 520px; padding-right: 4px; }
+    .top-list .item { display: flex; align-items: center; gap: 6px; padding: 5px 7px; border-radius: 6px; background: #f8fafc; cursor: pointer; border: 1px solid transparent; }
+    .top-list .item:hover { background: #eff6ff; border-color: #93c5fd; transform: translateX(2px); }
+    .rank { width: 21px; height: 21px; border-radius: 5px; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; flex: 0 0 auto; }
+    .info { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+    .l1 { font-size: 11px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .l2 { font-size: 9px; color: #94a3b8; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .item .val { font-size: 12px; font-weight: 900; color: #2563eb; text-align: right; flex: 0 0 auto; }
+    .item .val small { display: block; font-size: 8px; color: #94a3b8; font-weight: 700; }
+    .gauges-panel { display: flex; flex-direction: column; background: #fff; height: 230px; min-height: 0; }
+    .gauges-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; height: 100%; min-height: 0; }
+    .gauge-card { border-radius: 18px; border: 1px solid rgba(15,23,42,.10); background: #fff; box-shadow: 0 12px 28px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.95); padding: 8px 10px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+    .gauge-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+    .gauge-title { font-size: 10px; line-height: 1.15; font-weight: 950; letter-spacing: .7px; text-transform: uppercase; color: #0f172a; }
+    .gauge-value { text-align: right; font-size: 16px; line-height: 1.1; font-weight: 950; color: #06101f; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .gauge-value small { display: block; margin-top: 2px; font-size: 10px; color: #4b5a77; font-weight: 800; text-transform: uppercase; }
+    .gauge-canvas { width: 100%; height: 145px; min-height: 0; flex: 0 0 145px; display: block; border-radius: 14px; background: #fff; }
+    @media (max-width: 1200px) { .grid { grid-template-columns: 1fr; } .grid-bottom { grid-template-columns: 1fr; } .kpi-row { grid-template-columns: repeat(2, 1fr); } .filters select.wide { min-width: 280px; } }
+    @media (max-width: 700px) { .kpi-row { grid-template-columns: 1fr; } .filters select.wide { min-width: 100%; } }
+  </style>
+</head>
+<body>
+  <div class="bi-wrap">
+    <div class="topbar">
+      <div class="brand"><span class="dot"></span><div><h1>Monitor de Ritmo de Producción</h1><div class="sub" id="brandSub"></div></div></div>
+      <div class="filters">
+        <label>Año <select id="fYear"></select></label>
+        <label>Mes <select id="fMonth"></select></label>
+        <label>Producción <select id="fProd" class="wide"></select></label>
+        <label>Objetivo mín <input type="number" id="objMin" disabled /></label>
+        <label>Objetivo máx <input type="number" id="objMax" disabled /></label>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi"><div class="label" id="legendKpiKg">KG acumulado</div><div class="val" id="kpiKg">—</div></div>
+      <div class="kpi"><div class="label" id="legendKpiProds">Ritmo laboral</div><div class="val" id="kpiProds">—</div></div>
+      <div class="kpi"><div class="label" id="legendKpiHours">Horas acumulado</div><div class="val" id="kpiHours">—</div></div>
+      <div class="kpi accent"><div class="label">Ritmo L Kg/H</div><div class="val" id="kpiRitmoL">—</div></div>
+      <div class="kpi accent"><div class="label">Producción Kg</div><div class="val" id="kpiKgProd">—</div></div>
+    </div>
+
+    <div class="grid">
+      <div class="panel tall">
+        <div class="panel-head"><h2>kg/h por tramo · producción seleccionada</h2><div class="meta" id="prodMeta">—</div></div>
+        <div class="chart" id="mainChart"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Top 11</h2>
+          <div class="head-controls">
+            <select id="topProductions">
+              <option value="rhythm-max-absolute" selected>Ritmo max absoluto</option>
+              <option value="rhythm-max-vs-ajuste">Ritmo max vs objetivo</option>
+              <option value="best-prct-superior">Mayor % superior</option>
+              <option value="bad-prct-bajo">Mayor % bajo</option>
+            </select>
+          </div>
+        </div>
+        <div class="top-list" id="topListProductions"></div>
+      </div>
+    </div>
+
+    <div class="grid-bottom">
+      <div class="panel"><div class="panel-head"><h2>kg producidos · por mes</h2><div class="meta">año actual</div></div><div class="chart" id="monthChart"></div></div>
+      <div class="panel gauges-panel">
+        <div class="gauges-grid">
+          <div class="gauge-card"><div class="gauge-head"><div class="gauge-title">Ritmo laboral kg/h</div><div class="gauge-value"><span id="gaugeLaboralText">0</span><small>kg/h</small></div></div><canvas class="gauge-canvas" data-gauge-id="ritmo-laboral"></canvas></div>
+          <div class="gauge-card"><div class="gauge-head"><div class="gauge-title">Ritmo máximo alcanzado kg/h</div><div class="gauge-value"><span id="gaugeMaxText">0</span><small>kg/h</small></div></div><canvas class="gauge-canvas" data-gauge-id="ritmo-maximo"></canvas></div>
+        </div>
+      </div>
+      <div class="panel"><div class="panel-head"><h2>Distribución del ritmo</h2><div class="meta">producción actual</div></div><div class="chart" id="donutChart"></div></div>
+    </div>
+  </div>
+
+  <script>
+    const qs = id => document.getElementById(id);
+    const f0 = n => Number(n || 0).toLocaleString('es-ES', { maximumFractionDigits: 0 });
+    const fpct = n => `${Number(n || 0) > 0 ? '+' : ''}${Number(n || 0).toFixed(1).replace('.', ',')}%`;
+    const pctClass = n => Number(n || 0) > 0 ? 'kpi-diff-positive' : Number(n || 0) < 0 ? 'kpi-diff-negative' : 'kpi-diff-neutral';
+    const toVuValue = kgHour => Number(kgHour || 0) / 1000;
+
+    let mainChart, monthChart, donutChart;
+    let CURRENT_YEAR = 2026;
+    let CURRENT_MONTH = '06';
+    let CURRENT_YM_LINES = [];
+    let PRODUCTION_NUMBER_SELECTED = -1;
+    let TOP_PRODUCTIONS_LISTS = {};
+    let GAUGES = {};
+    let GAUGE_ANIMATION_STARTED = false;
+
+    const PRODUCT_NAMES = [
+      'L1 · Merluza corte premium', 'L2 · Bacalao porciones skinless', 'L3 · Salmón dados marinados',
+      'L1 · Langostino cocido selección', 'L2 · Calamar tiras rebozadas', 'L3 · Hamburguesa de atún',
+      'L1 · Croquetas de marisco', 'L2 · Pulpo cocido loncheado', 'L3 · Filete de abadejo',
+      'L1 · Empanado crujiente azul', 'L2 · Sepia limpia bandeja', 'L3 · Rodaja de bonito'
+    ];
+
+    function seedRand(seed) {
+      let x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    }
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+
+    function makeFranja(year, month, idx, ritmoBase, ajusteMin, ajusteMax) {
+      const points = [];
+      const day = Math.min(26, 2 + ((idx * 3 + month) % 24));
+      const startHour = 7 + (idx % 3);
+      const startMinute = (idx * 7) % 50;
+      for (let i = 0; i < 22; i++) {
+        const d = new Date(year, month - 1, day, startHour, startMinute + i * 2.5);
+        const wave = Math.sin(i * .65 + idx) * 150;
+        const dip = i > 10 && i < 15 ? -360 + i * 22 : 0;
+        const peak = i > 16 && i < 20 ? 170 : 0;
+        const noise = (seedRand(year + month * 99 + idx * 11 + i) - .5) * 90;
+        const rt = Math.max(20, Math.round(ritmoBase + wave + dip + peak + noise));
+        points.push({ time: `${year}-${pad2(month)}-${pad2(day)} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`, rt });
+      }
+      return points;
+    }
+
+    function calcDistribution(franja, min, max) {
+      let bajo = 0, medio = 0, superior = 0;
+      franja.forEach(p => {
+        if (p.rt < min) bajo++;
+        else if (p.rt > max) superior++;
+        else medio++;
+      });
+      const total = bajo + medio + superior || 1;
+      return { prct_bajo: bajo * 100 / total, prct_medio: medio * 100 / total, prct_superior: superior * 100 / total };
+    }
+
+    function buildDemoData() {
+      const data = {};
+      [2025, 2026].forEach(year => {
+        data[year] = {};
+        for (let m = 1; m <= 12; m++) {
+          const count = m <= 6 ? 7 + (m % 3) : 3 + (m % 4);
+          data[year][pad2(m)] = [];
+          for (let i = 0; i < count; i++) {
+            const base = 420 + ((i * 61 + m * 37 + (year - 2025) * 40) % 420);
+            const ajusteMin = 180 + ((i + m) % 4) * 20;
+            const ajusteMax = 330 + ((i + m) % 5) * 45;
+            const franja = makeFranja(year, m, i, base, ajusteMin, ajusteMax);
+            const ritmoMax = Math.max(...franja.map(p => p.rt));
+            const kg = Math.round(380 + seedRand(year * m + i) * 7600);
+            const ritmoL = Math.round(franja.reduce((a, p) => a + p.rt, 0) / franja.length);
+            const dist = calcDistribution(franja, ajusteMin, ajusteMax);
+            const fechaIni = franja[0].time;
+            const fechaFin = franja[franja.length - 1].time;
+            data[year][pad2(m)].push({
+              id: `${year}${pad2(m)}${pad2(i + 1)}`,
+              year, month: m, production_index_month: i,
+              des_article: `${fechaIni} ${PRODUCT_NAMES[(i + m) % PRODUCT_NAMES.length]}`,
+              fecha_ini: fechaIni,
+              fecha_fin: fechaFin,
+              duracion: '00:' + pad2(45 + (i * 4) % 50),
+              kg, ritmo_l: ritmoL, ritmo_max: ritmoMax,
+              ajuste_min: ajusteMin, ajuste_max: ajusteMax,
+              franja,
+              ...dist,
+              ritmo_max_over_ajuste_percentage: ((ritmoMax - ajusteMax) * 100) / ajusteMax
+            });
+          }
+        }
+      });
+      return data;
+    }
+
+    const DEMO_DB = buildDemoData();
+
+    function initCharts() {
+      mainChart = echarts.init(qs('mainChart'));
+      monthChart = echarts.init(qs('monthChart'));
+      donutChart = echarts.init(qs('donutChart'));
+      initGauges();
+      window.addEventListener('resize', () => {
+        mainChart.resize(); monthChart.resize(); donutChart.resize(); Object.values(GAUGES).forEach(g => g.resize());
+      });
+    }
+
+    function setYearMonthHTML() {
+      qs('fYear').innerHTML = [2026, 2025].map(y => `<option value="${y}" ${y == CURRENT_YEAR ? 'selected' : ''}>${y}</option>`).join('');
+      qs('fMonth').innerHTML = Array.from({ length: 12 }, (_, i) => pad2(i + 1)).map(m => `<option value="${m}" ${m == CURRENT_MONTH ? 'selected' : ''}>${m}</option>`).join('');
+    }
+
+    function getYearComparison(year) {
+      const prev = year - 1;
+      const monthsToDate = Array.from({ length: Number(CURRENT_MONTH) }, (_, i) => pad2(i + 1));
+      function sumYear(y) {
+        const rows = monthsToDate.flatMap(m => DEMO_DB[y]?.[m] || []);
+        const kg = rows.reduce((a, r) => a + r.kg, 0);
+        const ritmo = rows.length ? rows.reduce((a, r) => a + r.ritmo_l, 0) / rows.length : 0;
+        const horas = rows.reduce((a, r) => a + r.kg / Math.max(1, r.ritmo_l), 0);
+        return { kg, ritmo_laboral: ritmo, horas_laborales: horas };
+      }
+      const cur = sumYear(year), old = sumYear(prev);
+      const diff = (a, b) => b ? ((a - b) * 100 / b) : 0;
+      return { year, previous_year: prev, year_data: cur, previous_year_data: old, diff: { diff_kg_percentage: diff(cur.kg, old.kg), diff_ritmo_laboral_percentage: diff(cur.ritmo_laboral, old.ritmo_laboral), diff_horas_percentage: diff(cur.horas_laborales, old.horas_laborales) } };
+    }
+
+    function insertDataIntoTopCards(r) {
+      qs('legendKpiKg').innerHTML = `KG acumulado · ${r.year} vs ${r.previous_year}`;
+      qs('kpiKg').innerHTML = `<div class="kpi-compare-main"><span>${f0(r.year_data.kg)}</span><span class="kpi-unit">kg</span><span class="kpi-diff ${pctClass(r.diff.diff_kg_percentage)}">${fpct(r.diff.diff_kg_percentage)}</span></div><div class="kpi-compare-sub">${r.previous_year}: ${f0(r.previous_year_data.kg)} kg</div>`;
+      qs('legendKpiProds').innerHTML = `Ritmo laboral · ${r.year} vs ${r.previous_year}`;
+      qs('kpiProds').innerHTML = `<div class="kpi-compare-main"><span>${f0(r.year_data.ritmo_laboral)}</span><span class="kpi-unit">kg/h</span><span class="kpi-diff ${pctClass(r.diff.diff_ritmo_laboral_percentage)}">${fpct(r.diff.diff_ritmo_laboral_percentage)}</span></div><div class="kpi-compare-sub">${r.previous_year}: ${f0(r.previous_year_data.ritmo_laboral)} kg/h</div>`;
+      qs('legendKpiHours').innerHTML = `Horas acumulado · ${r.year} vs ${r.previous_year}`;
+      qs('kpiHours').innerHTML = `<div class="kpi-compare-main"><span>${f0(r.year_data.horas_laborales)}</span><span class="kpi-unit">h</span><span class="kpi-diff ${pctClass(r.diff.diff_horas_percentage)}">${fpct(r.diff.diff_horas_percentage)}</span></div><div class="kpi-compare-sub">${r.previous_year}: ${f0(r.previous_year_data.horas_laborales)} h</div>`;
+    }
+
+    function drawMainRitmoChart(l) {
+      const franja = l.franja;
+      const tiempos = franja.map(p => p.time);
+      const ritmos = franja.map(p => p.rt);
+      const yMax = Math.max(...ritmos, l.ajuste_max) * 1.12;
+      qs('prodMeta').textContent = `${l.des_article} · ${f0(l.kg)} kg`;
+      mainChart.setOption({
+        backgroundColor: 'transparent', animation: false,
+        grid: { top: 24, left: 56, right: 18, bottom: 70, containLabel: true },
+        tooltip: { trigger: 'axis', backgroundColor: '#fff', borderColor: '#cbd5e1', borderWidth: 1, padding: [10, 12], textStyle: { color: '#0f172a', fontSize: 12 }, axisPointer: { type: 'line', lineStyle: { color: '#2563eb', width: 1 } }, formatter: params => { const p = franja[params[0].dataIndex]; return `<div style="font-weight:800;margin-bottom:4px;">${p.time}</div><div style="color:#475569;">Ritmo: <b style="color:#2563eb;">${f0(p.rt)} kg/h</b></div><div style="color:#475569;">Punto cada <b>2,5 min</b> · ventana de pesadas <b>5 min</b></div>`; } },
+        xAxis: { type: 'category', data: tiempos, boundaryGap: false, axisLine: { lineStyle: { color: '#cbd5e1' } }, axisTick: { show: false }, axisLabel: { color: '#64748b', fontSize: 10, margin: 8, formatter: v => String(v).substring(11, 16) }, splitLine: { show: false } },
+        yAxis: { type: 'value', min: 0, max: Math.ceil(yMax), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: '#64748b', fontSize: 11, margin: 8, formatter: v => f0(v) }, splitLine: { lineStyle: { color: '#e2e8f0' } }, name: 'kg/h', nameLocation: 'end', nameTextStyle: { color: '#94a3b8', fontSize: 10, padding: [0, 0, 4, -40] } },
+        dataZoom: [{ type: 'inside', xAxisIndex: 0, filterMode: 'none', start: 0, end: 100 }, { type: 'slider', xAxisIndex: 0, filterMode: 'none', height: 18, bottom: 22, borderColor: '#e2e8f0', backgroundColor: '#f8fafc', fillerColor: 'rgba(37,99,235,.12)', handleStyle: { color: '#023ebf', borderColor: '#023ebf' }, textStyle: { color: '#64748b', fontSize: 10 } }],
+        series: [
+          { name: 'Zona objetivo', type: 'line', data: tiempos.map(() => l.ajuste_min), showSymbol: false, lineStyle: { width: 0 }, silent: true, markArea: { silent: true, itemStyle: { color: 'rgba(34,197,94,.10)' }, data: [[{ yAxis: l.ajuste_min }, { yAxis: l.ajuste_max }]] } },
+          { name: 'Objetivo mínimo', type: 'line', data: tiempos.map(() => l.ajuste_min), showSymbol: false, lineStyle: { color: '#ef4444', width: 1, type: 'dashed' } },
+          { name: 'Objetivo máximo', type: 'line', data: tiempos.map(() => l.ajuste_max), showSymbol: false, lineStyle: { color: '#16a34a', width: 1, type: 'dashed' } },
+          { name: 'Ritmo laboral medio', type: 'line', data: tiempos.map(() => l.ritmo_l), showSymbol: false, z: 8, lineStyle: { color: '#2d85ff', width: 1 }, label: { show: true, position: 'end', formatter: `${f0(l.ritmo_l)} kg/h`, color: '#2d85ff', fontSize: 10, fontWeight: 700, backgroundColor: 'rgba(255,255,255,.86)', padding: [2, 4], borderRadius: 4 }, emphasis: { disabled: true } },
+          { name: 'Ritmo', type: 'line', data: ritmos, smooth: false, symbol: 'circle', symbolSize: 5, showSymbol: true, connectNulls: false, lineStyle: { width: 1.8, color: '#1e40af' }, itemStyle: { color: '#1e40af', borderColor: '#fff', borderWidth: 1 }, areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: 'rgba(37,99,235,.20)' }, { offset: 1, color: 'rgba(37,99,235,0)' }] } }, emphasis: { focus: 'series' } }
+        ]
+      }, true);
+    }
+
+    function drawMonthKgChart() {
+      const meses = Array.from({ length: 12 }, (_, i) => pad2(i + 1));
+      const kilos = meses.map(m => (DEMO_DB[CURRENT_YEAR]?.[m] || []).reduce((a, r) => a + r.kg, 0));
+      monthChart.setOption({ backgroundColor: 'transparent', animation: true, grid: { top: 22, left: 8, right: 14, bottom: 24, containLabel: true }, tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: '#fff', borderColor: '#cbd5e1', borderWidth: 1, padding: [10, 12], textStyle: { color: '#0f172a', fontSize: 12 }, formatter: p => `<div style="font-weight:800;margin-bottom:4px;">Mes ${p[0].axisValue}</div><div style="color:#475569;">Kg producidos: <b>${f0(p[0].value)} kg</b></div>` }, xAxis: { type: 'category', data: meses, axisLine: { lineStyle: { color: '#cbd5e1' } }, axisTick: { show: false }, axisLabel: { color: '#64748b', fontSize: 10, fontWeight: 700 } }, yAxis: { type: 'value', axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: '#64748b', fontSize: 10, formatter: v => v >= 1000 ? (v / 1000).toFixed(0) + 'k' : f0(v) }, splitLine: { lineStyle: { color: '#e2e8f0' } } }, series: [{ name: 'Kg producidos', type: 'bar', data: kilos, barMaxWidth: 32, itemStyle: { color: '#1e40af', borderRadius: [7, 7, 0, 0] }, emphasis: { itemStyle: { color: '#1d4ed8' } }, label: { show: true, position: 'top', color: '#475569', fontSize: 9, fontWeight: 800, formatter: p => p.value > 0 ? (p.value >= 1000 ? (p.value / 1000).toFixed(0) + 'k' : f0(p.value)) : '' } }] }, true);
+    }
+
+    function drawDonutRitmoChart(l) {
+      const total = l.prct_bajo + l.prct_medio + l.prct_superior || 1;
+      const bajo = l.prct_bajo * 100 / total, en = l.prct_medio * 100 / total, sobre = l.prct_superior * 100 / total;
+      donutChart.setOption({ backgroundColor: 'transparent', animation: true, tooltip: { trigger: 'item', backgroundColor: '#fff', borderColor: '#cbd5e1', borderWidth: 1, padding: [10, 12], textStyle: { color: '#0f172a', fontSize: 12 }, formatter: p => `<div style="font-weight:800;margin-bottom:4px;">${p.name}</div><div style="color:#475569;">Porcentaje: <b>${Number(p.value).toFixed(1).replace('.', ',')}%</b></div>` }, legend: { bottom: 0, left: 'center', itemWidth: 9, itemHeight: 9, icon: 'circle', textStyle: { fontSize: 10, color: '#64748b', fontWeight: 600 } }, series: [{ name: 'Distribución del ritmo', type: 'pie', radius: ['54%', '76%'], center: ['50%', '43%'], avoidLabelOverlap: true, itemStyle: { borderColor: '#fff', borderWidth: 3, borderRadius: 6 }, label: { show: true, position: 'center', formatter: `{a|${en.toFixed(0)}%}\n{b|en objetivo}`, rich: { a: { fontSize: 25, fontWeight: 900, color: '#16a34a', lineHeight: 30 }, b: { fontSize: 11, fontWeight: 700, color: '#64748b', lineHeight: 15 } } }, emphasis: { scale: true, scaleSize: 5 }, data: [{ value: Number(bajo.toFixed(2)), name: 'Bajo mínimo', itemStyle: { color: '#ef4444' } }, { value: Number(en.toFixed(2)), name: 'En objetivo', itemStyle: { color: '#22c55e' } }, { value: Number(sobre.toFixed(2)), name: 'Sobre máximo', itemStyle: { color: '#f59e0b' } }] }] }, true);
+    }
+
+    function updateProductSelect() {
+      const rows = CURRENT_YM_LINES;
+      const selected = PRODUCTION_NUMBER_SELECTED >= 0 ? PRODUCTION_NUMBER_SELECTED : rows.length - 1;
+      qs('fProd').innerHTML = rows.map((l, i) => `<option value="${i}" ${i === selected ? 'selected' : ''}>${l.des_article} [${f0(l.kg)} Kg]</option>`).join('');
+      PRODUCTION_NUMBER_SELECTED = selected;
+      const l = rows[selected];
+      qs('objMin').value = l.ajuste_min;
+      qs('objMax').value = l.ajuste_max;
+      qs('kpiRitmoL').textContent = f0(l.ritmo_l);
+      qs('kpiKgProd').textContent = f0(l.kg);
+      qs('brandSub').textContent = `Inicio ${l.fecha_ini} | Fin ${l.fecha_fin} | Duración ${l.duracion}`;
+      drawMainRitmoChart(l);
+      drawDonutRitmoChart(l);
+      setUVMeterGauges(l);
+    }
+
+    function buildTopLists() {
+      const all = Object.values(DEMO_DB).flatMap(y => Object.values(y).flat()).flat();
+      const sortTake = fn => [...all].sort(fn).slice(0, 11);
+      TOP_PRODUCTIONS_LISTS = {
+        'rhythm-max-absolute': sortTake((a, b) => b.ritmo_max - a.ritmo_max),
+        'rhythm-max-vs-ajuste': sortTake((a, b) => b.ritmo_max_over_ajuste_percentage - a.ritmo_max_over_ajuste_percentage),
+        'best-prct-superior': sortTake((a, b) => b.prct_superior - a.prct_superior),
+        'bad-prct-bajo': sortTake((a, b) => b.prct_bajo - a.prct_bajo)
+      };
+    }
+
+    function getTopMain(p, metric) {
+      if (metric === 'rhythm-max-absolute') return { text: f0(p.ritmo_max), unit: 'kg/h' };
+      if (metric === 'rhythm-max-vs-ajuste') return { text: fpct(p.ritmo_max_over_ajuste_percentage), unit: 'vs obj' };
+      if (metric === 'best-prct-superior') return { text: p.prct_superior.toFixed(1).replace('.', ','), unit: '% sup' };
+      return { text: p.prct_bajo.toFixed(1).replace('.', ','), unit: '% bajo' };
+    }
+
+    function getTopSecond(p, metric) {
+      if (metric === 'rhythm-max-absolute') return `Obj máx ${f0(p.ajuste_max)} kg/h · RL ${f0(p.ritmo_l)} kg/h`;
+      if (metric === 'rhythm-max-vs-ajuste') return `RM ${f0(p.ritmo_max)} kg/h · Obj máx ${f0(p.ajuste_max)} kg/h`;
+      if (metric === 'best-prct-superior') return `Medio ${p.prct_medio.toFixed(1).replace('.', ',')}% · Bajo ${p.prct_bajo.toFixed(1).replace('.', ',')}%`;
+      return `Medio ${p.prct_medio.toFixed(1).replace('.', ',')}% · Superior ${p.prct_superior.toFixed(1).replace('.', ',')}%`;
+    }
+
+    function paintTopProductions() {
+      const metric = qs('topProductions').value;
+      const rows = TOP_PRODUCTIONS_LISTS[metric] || [];
+      qs('topListProductions').innerHTML = rows.map((p, i) => { const main = getTopMain(p, metric); return `<div class="item" data-year="${p.year}" data-month="${pad2(p.month)}" data-index="${p.production_index_month}"><div class="rank">#${i + 1}</div><div class="info"><div class="l1">${p.des_article.replace(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2} /, '')}</div><div class="l2">${p.fecha_ini} · ${f0(p.kg)} kg · ${getTopSecond(p, metric)}</div></div><div class="val">${main.text}<small>${main.unit}</small></div></div>`; }).join('');
+    }
+
+    function getRitmoData() {
+      setYearMonthHTML();
+      CURRENT_YM_LINES = DEMO_DB[CURRENT_YEAR]?.[CURRENT_MONTH] || [];
+      PRODUCTION_NUMBER_SELECTED = -1;
+      insertDataIntoTopCards(getYearComparison(CURRENT_YEAR));
+      drawMonthKgChart();
+      updateProductSelect();
+      paintTopProductions();
+    }
+
+    function initEvents() {
+      qs('fYear').addEventListener('change', e => { CURRENT_YEAR = Number(e.target.value); getRitmoData(); });
+      qs('fMonth').addEventListener('change', e => { CURRENT_MONTH = e.target.value; getRitmoData(); });
+      qs('fProd').addEventListener('change', e => { PRODUCTION_NUMBER_SELECTED = Number(e.target.value); updateProductSelect(); });
+      qs('topProductions').addEventListener('change', paintTopProductions);
+      qs('topListProductions').addEventListener('click', e => {
+        const item = e.target.closest('.item');
+        if (!item) return;
+        CURRENT_YEAR = Number(item.dataset.year);
+        CURRENT_MONTH = item.dataset.month;
+        CURRENT_YM_LINES = DEMO_DB[CURRENT_YEAR]?.[CURRENT_MONTH] || [];
+        PRODUCTION_NUMBER_SELECTED = Number(item.dataset.index);
+        setYearMonthHTML();
+        insertDataIntoTopCards(getYearComparison(CURRENT_YEAR));
+        drawMonthKgChart();
+        updateProductSelect();
+      });
+    }
+
+    function initGauges() {
+      GAUGES['ritmo-laboral'] = new MinimalGauge(document.querySelector('[data-gauge-id="ritmo-laboral"]'), { label: 'RITMO L', scaleMin: .10, scaleMax: .78, redFrom: .35, redStartRatio: .78, labels: [], subtitle: 'x1000 kg/h' });
+      GAUGES['ritmo-maximo'] = new MinimalGauge(document.querySelector('[data-gauge-id="ritmo-maximo"]'), { label: 'RITMO MÁX', scaleMin: .10, scaleMax: .78, redFrom: .35, redStartRatio: .78, labels: [], subtitle: 'x1000 kg/h' });
+      if (!GAUGE_ANIMATION_STARTED) {
+        GAUGE_ANIMATION_STARTED = true;
+        requestAnimationFrame(function loop() { Object.values(GAUGES).forEach(g => g.render()); requestAnimationFrame(loop); });
+      }
+    }
+
+    function roundGaugeNumber(value) { return Number((Number(value) || 0).toFixed(6)); }
+    function createGaugeLabel(value, zone) { return { value: roundGaugeNumber(value), text: Number(value).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }), zone }; }
+    function normalizarEscalaGauge(minimoVisible, inicioRojo) {
+      let min = Number(minimoVisible), redFrom = Number(inicioRojo);
+      if (!Number.isFinite(min)) min = 0;
+      if (!Number.isFinite(redFrom)) redFrom = min + .30;
+      if (min < 0) min = 0;
+      if (redFrom <= min) redFrom = min + .10;
+      const scaleMax = redFrom + ((redFrom - min) * .35);
+      return { min: roundGaugeNumber(min), redFrom: roundGaugeNumber(redFrom), scaleMax: roundGaugeNumber(scaleMax) };
+    }
+    function crearLabelsEscalaGauge(min, redFrom, scaleMax) {
+      const labels = [], used = {}; const step = .1;
+      const start = Math.ceil((Number(min) - .000001) / step) * step;
+      const end = Math.floor((Number(scaleMax) + .000001) / step) * step;
+      for (let v = start; v <= end + .000001; v += step) {
+        const r = roundGaugeNumber(v), key = r.toFixed(1);
+        if (!used[key]) { used[key] = true; labels.push(createGaugeLabel(r, r >= redFrom ? 'red' : 'black')); }
+      }
+      return labels.sort((a, b) => a.value - b.value);
+    }
+    function updateGaugeText(id, real) { qs(id).textContent = f0(real); }
+    function setGauge(id, valueVu, minVu, redVu, real) {
+      const escala = normalizarEscalaGauge(minVu, redVu);
+      GAUGES[id].setScale({ scaleMin: escala.min, scaleMax: escala.scaleMax, redFrom: escala.redFrom, redStartRatio: .78, labels: crearLabelsEscalaGauge(escala.min, escala.redFrom, escala.scaleMax), subtitle: 'x1000 kg/h' });
+      GAUGES[id].setValue(valueVu);
+      updateGaugeText(id === 'ritmo-laboral' ? 'gaugeLaboralText' : 'gaugeMaxText', real);
+    }
+    function setUVMeterGauges(l) {
+      const minVu = toVuValue(l.ajuste_min) / 2;
+      const redVu = toVuValue(l.ajuste_max);
+      setGauge('ritmo-laboral', toVuValue(l.ritmo_l), minVu, redVu, l.ritmo_l);
+      setGauge('ritmo-maximo', toVuValue(l.ritmo_max), minVu, redVu, l.ritmo_max);
+    }
+
+    class MinimalGauge {
+      constructor(canvas, config) {
+        this.canvas = canvas; this.ctx = canvas.getContext('2d'); this.config = config;
+        this.scaleMin = Number(config.scaleMin); this.scaleMax = Number(config.scaleMax); this.redFrom = Number(config.redFrom); this.redStartRatio = Number(config.redStartRatio) || .78;
+        this.value = this.scaleMin; this.target = this.scaleMin; this.velocity = 0; this.bootStarted = false; this.bootFinished = false; this.pendingFinal = this.scaleMin; this.bootSweep = null;
+        this.resize(); window.addEventListener('resize', () => this.resize()); if (typeof ResizeObserver !== 'undefined') { this._ro = new ResizeObserver(() => this.resize()); this._ro.observe(this.canvas); }
+      }
+      setScale(o = {}) {
+        const min = Number(o.scaleMin), max = Number(o.scaleMax), redFrom = Number(o.redFrom), redStartRatio = Number(o.redStartRatio);
+        this.scaleMin = Number.isFinite(min) ? min : this.scaleMin;
+        this.scaleMax = Number.isFinite(max) && max > this.scaleMin ? max : this.scaleMin + 1;
+        this.redFrom = Number.isFinite(redFrom) ? redFrom : this.scaleMax;
+        this.redStartRatio = Number.isFinite(redStartRatio) ? redStartRatio : this.redStartRatio;
+        if (Array.isArray(o.labels)) this.config.labels = o.labels;
+        if (typeof o.subtitle === 'string') this.config.subtitle = o.subtitle;
+        this.value = this.clamp(this.value, this.scaleMin, this.scaleMax); this.target = this.clamp(this.target, this.scaleMin, this.scaleMax); this.pendingFinal = this.clamp(this.pendingFinal, this.scaleMin, this.scaleMax);
+      }
+      resize() { const rect = this.canvas.getBoundingClientRect(); const dpr = window.devicePixelRatio || 1; this.canvas.width = Math.max(1, Math.floor(rect.width * dpr)); this.canvas.height = Math.max(1, Math.floor(rect.height * dpr)); this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0); this.w = rect.width || 1; this.h = rect.height || 1; }
+      clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+      easeInOut01(t) { const x = this.clamp(t, 0, 1); return x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2; }
+      lerp(a, b, t) { return a + ((b - a) * t); }
+      roundedRect(ctx, x, y, w, h, r) { const rr = Math.min(r, w / 2, h / 2); ctx.beginPath(); ctx.moveTo(x + rr, y); ctx.lineTo(x + w - rr, y); ctx.quadraticCurveTo(x + w, y, x + w, y + rr); ctx.lineTo(x + w, y + h - rr); ctx.quadraticCurveTo(x + w, y + h, x + w - rr, y + h); ctx.lineTo(x + rr, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - rr); ctx.lineTo(x, y + rr); ctx.quadraticCurveTo(x, y, x + rr, y); ctx.closePath(); }
+      getGeometry() { return { cx: this.w * .5, cy: this.h * .86, radius: Math.min(this.w * .55, this.h * .78), start: -143 * Math.PI / 180, end: -37 * Math.PI / 180 }; }
+      valueToPercent(value) { const v = Number(value); if (v <= this.redFrom) { const denom = this.redFrom - this.scaleMin; if (denom <= 0) return 0; return this.clamp(((v - this.scaleMin) / denom) * this.redStartRatio, 0, this.redStartRatio); } const redDenom = this.scaleMax - this.redFrom; if (redDenom <= 0) return this.redStartRatio; return this.clamp(this.redStartRatio + ((v - this.redFrom) / redDenom) * (1 - this.redStartRatio), this.redStartRatio, 1); }
+      angleFromValue(value) { const { start, end } = this.getGeometry(); const p = this.valueToPercent(value); return start + (end - start) * Math.pow(p, .94); }
+      startBootSweep(finalValue) { this.bootStarted = true; this.bootFinished = false; this.pendingFinal = this.clamp(Number(finalValue), this.scaleMin, this.scaleMax); this.value = this.scaleMin; this.velocity = 0; this.bootSweep = { startTime: performance.now() }; }
+      setValue(value, forceSweep = false) { const v = this.clamp(Number(value), this.scaleMin, this.scaleMax); if (forceSweep || !this.bootStarted) { this.startBootSweep(v); return; } if (!this.bootFinished) { this.pendingFinal = v; return; } this.target = v; }
+      update() {
+        if (this.bootSweep && !this.bootFinished) {
+          const elapsed = performance.now() - this.bootSweep.startTime, tSube = 850, tBaja = 850, tFinal = 850;
+          const min = this.scaleMin, max = this.scaleMax, finalValue = this.clamp(this.pendingFinal, this.scaleMin, this.scaleMax);
+          if (elapsed <= tSube) { this.value = this.lerp(min, max, this.easeInOut01(elapsed / tSube)); return; }
+          if (elapsed <= tSube + tBaja) { this.value = this.lerp(max, min, this.easeInOut01((elapsed - tSube) / tBaja)); return; }
+          if (elapsed <= tSube + tBaja + tFinal) { this.value = this.lerp(min, finalValue, this.easeInOut01((elapsed - tSube - tBaja) / tFinal)); return; }
+          this.bootFinished = true; this.bootSweep = null; this.value = finalValue; this.target = finalValue; this.velocity = 0; return;
+        }
+        const spring = .055, damping = .82, force = (this.target - this.value) * spring; this.velocity = (this.velocity + force) * damping; this.value += this.velocity; this.value = this.clamp(this.value, this.scaleMin, this.scaleMax);
+      }
+      drawPanel() { const ctx = this.ctx; ctx.clearRect(0, 0, this.w, this.h); ctx.save(); this.roundedRect(ctx, 0, 0, this.w, this.h, 14); ctx.fillStyle = '#fff'; ctx.fill(); ctx.strokeStyle = 'rgba(15,23,42,.12)'; ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); }
+      drawScaleZones() { const ctx = this.ctx; const { cx, cy, radius, start, end } = this.getGeometry(); const redA = start + (end - start) * this.redStartRatio; ctx.save(); ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(cx, cy, radius + 4, start, end); ctx.lineWidth = 3.8; ctx.strokeStyle = 'rgba(15,23,42,.14)'; ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, radius + 4, start, redA); ctx.lineWidth = 3.8; ctx.strokeStyle = 'rgba(15,23,42,.84)'; ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, radius + 4, redA, end); ctx.lineWidth = 4.2; ctx.strokeStyle = 'rgba(220,38,38,.94)'; ctx.stroke(); ctx.restore(); }
+      drawTicksAndNumbers() { const ctx = this.ctx; const { cx, cy, radius, start, end } = this.getGeometry(); ctx.save(); ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(cx, cy, radius, start, end); ctx.lineWidth = 1.35; ctx.strokeStyle = 'rgba(15,23,42,.55)'; ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, radius * .89, start, end); ctx.lineWidth = .85; ctx.strokeStyle = 'rgba(15,23,42,.18)'; ctx.stroke(); const totalTicks = 60; for (let i = 0; i <= totalTicks; i++) { const p = i / totalTicks, angle = start + (end - start) * p, big = i % 10 === 0, medium = i % 5 === 0; const outer = radius, inner = radius - (big ? 21 : medium ? 14 : 8); ctx.beginPath(); ctx.moveTo(cx + Math.cos(angle) * outer, cy + Math.sin(angle) * outer); ctx.lineTo(cx + Math.cos(angle) * inner, cy + Math.sin(angle) * inner); ctx.lineWidth = big ? 1.6 : medium ? 1 : .65; ctx.strokeStyle = p >= this.redStartRatio ? 'rgba(185,28,28,.96)' : 'rgba(15,23,42,.72)'; ctx.stroke(); } ctx.font = `700 ${this.h < 155 ? 8 : 10}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; (this.config.labels || []).forEach(labelItem => { const value = Number(labelItem.value); if (!Number.isFinite(value) || value < this.scaleMin || value > this.scaleMax) return; const p = this.valueToPercent(value), angle = start + (end - start) * p; ctx.fillStyle = labelItem.zone === 'red' ? 'rgba(185,28,28,1)' : 'rgba(15,23,42,.78)'; ctx.fillText(labelItem.text, cx + Math.cos(angle) * (radius - 35), cy + Math.sin(angle) * (radius - 35)); }); ctx.restore(); }
+      drawText() { const ctx = this.ctx; ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `${this.h < 155 ? '700' : '600'} ${this.h < 155 ? 13 : 18}px Arial`; ctx.fillStyle = 'rgba(15,23,42,.48)'; ctx.fillText(this.config.label, this.w * .5, this.h * .58); ctx.font = `700 ${this.h < 155 ? 8 : 10}px Arial`; ctx.fillStyle = 'rgba(15,23,42,.38)'; ctx.fillText(this.config.subtitle || 'x1000 kg/h', this.w * .5, this.h * .67); ctx.restore(); }
+      drawNeedle() { const ctx = this.ctx; const { cx, cy, radius } = this.getGeometry(); const angle = this.angleFromValue(this.value); const tipLength = radius - 8, redPart = tipLength * .20, blackLength = tipLength - redPart, backLength = 28; const blackEndX = cx + Math.cos(angle) * blackLength, blackEndY = cy + Math.sin(angle) * blackLength, tipX = cx + Math.cos(angle) * tipLength, tipY = cy + Math.sin(angle) * tipLength, backX = cx - Math.cos(angle) * backLength, backY = cy - Math.sin(angle) * backLength; ctx.save(); ctx.lineCap = 'round'; ctx.shadowColor = 'rgba(15,23,42,.30)'; ctx.shadowBlur = 2.8; ctx.shadowOffsetX = 1.2; ctx.shadowOffsetY = 2.2; ctx.beginPath(); ctx.moveTo(backX, backY); ctx.lineTo(cx, cy); ctx.lineWidth = 1.9; ctx.strokeStyle = 'rgba(15,23,42,.92)'; ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(blackEndX, blackEndY); ctx.lineWidth = 1.75; ctx.strokeStyle = '#020617'; ctx.stroke(); ctx.shadowColor = 'rgba(220,38,38,.35)'; ctx.shadowBlur = 2; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0; ctx.beginPath(); ctx.moveTo(blackEndX, blackEndY); ctx.lineTo(tipX, tipY); ctx.lineWidth = 2; ctx.strokeStyle = '#dc2626'; ctx.stroke(); ctx.restore(); }
+      drawPivot() { const ctx = this.ctx; const { cx, cy } = this.getGeometry(); const pivotRadius = this.h < 155 ? 9 : 12, innerRadius = this.h < 155 ? 3.8 : 4.8; ctx.save(); ctx.shadowColor = 'rgba(15,23,42,.28)'; ctx.shadowBlur = 4; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 2; const outer = ctx.createRadialGradient(cx - 3, cy - 3, 1, cx, cy, pivotRadius); outer.addColorStop(0, '#fff'); outer.addColorStop(.30, '#e5e7eb'); outer.addColorStop(.62, '#64748b'); outer.addColorStop(1, '#020617'); ctx.beginPath(); ctx.arc(cx, cy, pivotRadius, 0, Math.PI * 2); ctx.fillStyle = outer; ctx.fill(); ctx.shadowColor = 'transparent'; ctx.beginPath(); ctx.arc(cx, cy, innerRadius, 0, Math.PI * 2); ctx.fillStyle = '#020617'; ctx.fill(); ctx.restore(); }
+      render() { this.update(); this.drawPanel(); this.drawScaleZones(); this.drawTicksAndNumbers(); this.drawText(); this.drawNeedle(); this.drawPivot(); }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => { initCharts(); buildTopLists(); initEvents(); getRitmoData(); });
+  </script>
+</body>
+</html>
