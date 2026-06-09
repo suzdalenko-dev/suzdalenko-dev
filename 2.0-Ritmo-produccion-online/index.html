@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Demo Ritmo Producción Industrial</title>
-   <link rel="icon" type="image/png" href="https://github.com/fluidicon.png" title="GitHub">
+  <title>Ritmo de producción industrial en tiempo real</title>
+
+  <link rel="icon" type="image/png" href="https://github.com/fluidicon.png" title="GitHub">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -37,7 +38,7 @@
     .line-panel {
       width: 100%;
       height: 50vh;
-      border-bottom: 5px solid #101827;
+      border-bottom: 5px solid #1f2937;
       display: flex;
       flex-direction: column;
       background: #ffffff;
@@ -78,10 +79,11 @@
     }
 
     .top-cell.orange-box {
-      background: #ff5a12;
-      color: #000;
+      background: #f4a261;
+      color: #111;
       margin: 4px 26px;
       height: 40px;
+      border-radius: 2px;
     }
 
     .top-cell.time {
@@ -91,10 +93,14 @@
 
     .metrics-row {
       height: 58px;
-      background: #17396d;
+      background: #064398;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      border-bottom: 3px solid #0a1d38;
+      border-bottom: 3px solid #17243a;
+    }
+
+    .line2 .metrics-row {
+      background: #064398;
     }
 
     .metric-card {
@@ -119,7 +125,7 @@
       width: 100%;
       height: 7px;
       margin-top: 8px;
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.82);
       border-radius: 5px;
       overflow: hidden;
     }
@@ -127,7 +133,7 @@
     .progress-fill {
       height: 100%;
       width: 0%;
-      background: #00e525;
+      background: #7fbf7b;
       transition: width 500ms linear, background 500ms linear;
     }
 
@@ -136,7 +142,7 @@
       width: 100%;
       min-height: 0;
       padding: 4px 12px 8px 12px;
-      background: #fbf0e2;
+      background: #f8f5ef;
     }
 
     .chart-zone canvas {
@@ -145,17 +151,13 @@
       display: block;
     }
 
-    .line2 .metrics-row {
-      background: #10315f;
-    }
-
     .demo-badge {
       position: fixed;
       right: 10px;
       bottom: 8px;
       z-index: 50;
       padding: 5px 10px;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, 0.55);
       color: white;
       font-size: 12px;
       border-radius: 4px;
@@ -269,15 +271,23 @@
     const REFRESH_SECONDS = 11;
 
     /*
-      MÁS PUNTOS:
       180 puntos x 11 segundos = 1980 segundos = 33 minutos aprox.
-      Si quieres todavía más, puedes subirlo a 240 o 300.
+      Para más histórico visible puedes subirlo a 240 o 300.
     */
     const MAX_POINTS = 180;
 
-    const BLUE_LINE_COLOR = "#001eff";
-    const BLUE_LINE_FILL = "rgba(0, 30, 255, 0.24)";
-    const BLUE_POINT_COLOR = "#001eff";
+    /*
+      PALETA MÁS SUAVE PARA EL GRÁFICO
+    */
+    const BLUE_LINE_COLOR = "#064398";
+    const BLUE_POINT_COLOR = "#064398";
+
+    const MIN_LINE_COLOR = "#c98282";
+    const MAX_LINE_COLOR = "#7cae7a";
+
+    const GOOD_BAR_COLOR = "#8ecf8a";
+    const LOW_BAR_COLOR = "#d98b8b";
+    const HIGH_BAR_COLOR = "#e0b06f";
 
     const lines = [
       {
@@ -364,14 +374,14 @@
 
     function getBarColor(value, line) {
       if (value < line.min) {
-        return "#ff0000";
+        return LOW_BAR_COLOR;
       }
 
       if (value > line.max) {
-        return "#ff8c00";
+        return HIGH_BAR_COLOR;
       }
 
-      return "#00e525";
+      return GOOD_BAR_COLOR;
     }
 
     function getPercent(value, line) {
@@ -431,13 +441,19 @@
 
         ctx.save();
 
-        ctx.fillStyle = "rgba(255, 125, 0, 0.17)";
+        /*
+          ZONAS MUY SUAVES:
+          - superior: naranja muy claro
+          - zona correcta: verde muy claro
+          - inferior: rojo muy claro
+        */
+        ctx.fillStyle = "rgba(224, 176, 111, 0.07)";
         ctx.fillRect(left, top, width, Math.max(0, yMax - top));
 
-        ctx.fillStyle = "rgba(0, 180, 0, 0.20)";
+        ctx.fillStyle = "rgba(142, 207, 138, 0.11)";
         ctx.fillRect(left, yMax, width, Math.max(0, yMin - yMax));
 
-        ctx.fillStyle = "rgba(255, 0, 0, 0.16)";
+        ctx.fillStyle = "rgba(217, 139, 139, 0.07)";
         ctx.fillRect(left, yMin, width, Math.max(0, bottom - yMin));
 
         ctx.restore();
@@ -459,42 +475,39 @@
               data: line.values,
 
               /*
-                LÍNEA AZUL MÁS SATURADA Y MÁS VISIBLE
+                Línea azul visible, pero menos agresiva.
               */
-              borderWidth: 6,
+              borderWidth: 4,
               borderColor: BLUE_LINE_COLOR,
-              backgroundColor: BLUE_LINE_FILL,
+              backgroundColor: "rgba(63, 111, 168, 0.08)",
               fill: false,
 
               /*
-                MÁS PUNTOS VISIBLES
+                Muchos puntos, pero con color más suave.
               */
-              pointRadius: 2.2,
-              pointHoverRadius: 5,
+              pointRadius: 1.8,
+              pointHoverRadius: 4,
               pointBorderWidth: 0,
               pointBackgroundColor: BLUE_POINT_COLOR,
               pointBorderColor: BLUE_POINT_COLOR,
 
-              /*
-                Menos suavizado para que se vean mejor los cambios industriales
-              */
               tension: 0.18
             },
             {
               label: "Mínimo " + line.min + " kg/h",
               data: line.labels.map(() => line.min),
-              borderWidth: 4,
-              borderColor: "#ff0000",
-              backgroundColor: "rgba(255, 0, 0, 0.10)",
+              borderWidth: 3,
+              borderColor: MIN_LINE_COLOR,
+              backgroundColor: "rgba(201, 130, 130, 0.05)",
               pointRadius: 0,
               tension: 0
             },
             {
               label: "Máximo " + line.max + " kg/h",
               data: line.labels.map(() => line.max),
-              borderWidth: 4,
-              borderColor: "#008000",
-              backgroundColor: "rgba(0, 128, 0, 0.10)",
+              borderWidth: 3,
+              borderColor: MAX_LINE_COLOR,
+              backgroundColor: "rgba(124, 174, 122, 0.05)",
               pointRadius: 0,
               tension: 0
             }
@@ -517,6 +530,7 @@
               position: "top",
               labels: {
                 boxWidth: 36,
+                color: "#4b5563",
                 font: {
                   size: 10,
                   weight: "bold"
@@ -524,6 +538,9 @@
               }
             },
             tooltip: {
+              backgroundColor: "rgba(31, 41, 55, 0.92)",
+              titleColor: "#ffffff",
+              bodyColor: "#ffffff",
               callbacks: {
                 label(context) {
                   return context.dataset.label + ": " + Math.round(context.parsed.y) + " kg/h";
@@ -534,9 +551,10 @@
           scales: {
             x: {
               grid: {
-                color: "rgba(0,0,0,0.07)"
+                color: "rgba(0, 0, 0, 0.045)"
               },
               ticks: {
+                color: "#6b7280",
                 maxTicksLimit: 18,
                 autoSkip: true,
                 maxRotation: 0,
@@ -552,15 +570,17 @@
               title: {
                 display: true,
                 text: "KG/H",
+                color: "#6b7280",
                 font: {
                   size: 11,
                   weight: "bold"
                 }
               },
               grid: {
-                color: "rgba(0,0,0,0.09)"
+                color: "rgba(0, 0, 0, 0.055)"
               },
               ticks: {
+                color: "#6b7280",
                 font: {
                   size: 10
                 }
