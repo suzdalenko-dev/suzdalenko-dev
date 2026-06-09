@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo Ritmo Producción Industrial</title>
+   <link rel="icon" type="image/png" href="https://github.com/fluidicon.png" title="GitHub">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #f4f4f4;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      color: #111;
+    }
+
+    .dashboard {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .line-panel {
+      width: 100%;
+      height: 50vh;
+      border-bottom: 5px solid #101827;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+    }
+
+    .line-panel:last-child {
+      border-bottom: none;
+    }
+
+    .top-row {
+      height: 48px;
+      display: grid;
+      grid-template-columns: 28% 22% 25% 25%;
+      align-items: center;
+      background: #ffffff;
+      border-bottom: 2px solid #d4d4d4;
+      font-family: "Arial Black", Arial, sans-serif;
+      line-height: 1;
+    }
+
+    .top-cell {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(20px, 2.3vw, 42px);
+      font-weight: 900;
+      color: #000;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 8px;
+    }
+
+    .top-cell.article {
+      justify-content: flex-start;
+      padding-left: 22px;
+    }
+
+    .top-cell.orange-box {
+      background: #ff5a12;
+      color: #000;
+      margin: 4px 26px;
+      height: 40px;
+    }
+
+    .top-cell.time {
+      justify-content: flex-end;
+      padding-right: 20px;
+    }
+
+    .metrics-row {
+      height: 58px;
+      background: #17396d;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-bottom: 3px solid #0a1d38;
+    }
+
+    .metric-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 14px;
+      color: #fff;
+      font-family: "Arial Black", Arial, sans-serif;
+      font-weight: 900;
+      overflow: hidden;
+    }
+
+    .metric-title {
+      text-align: center;
+      font-size: clamp(22px, 2.7vw, 48px);
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 7px;
+      margin-top: 8px;
+      background: #ffffff;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #00e525;
+      transition: width 500ms linear, background 500ms linear;
+    }
+
+    .chart-zone {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+      padding: 4px 12px 8px 12px;
+      background: #fbf0e2;
+    }
+
+    .chart-zone canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+
+    .line2 .metrics-row {
+      background: #10315f;
+    }
+
+    .demo-badge {
+      position: fixed;
+      right: 10px;
+      bottom: 8px;
+      z-index: 50;
+      padding: 5px 10px;
+      background: rgba(0, 0, 0, 0.65);
+      color: white;
+      font-size: 12px;
+      border-radius: 4px;
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+
+    @media (max-width: 900px) {
+      .top-row {
+        height: 42px;
+        grid-template-columns: 35% 22% 20% 23%;
+      }
+
+      .metrics-row {
+        height: 50px;
+      }
+
+      .top-cell.article {
+        padding-left: 8px;
+      }
+
+      .top-cell.orange-box {
+        margin: 4px 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="dashboard">
+
+    <!-- LINEA 1 -->
+    <section class="line-panel line1">
+      <div class="top-row">
+        <div class="top-cell article" id="articleName1">Bobina Acero S355 Kg</div>
+        <div class="top-cell" id="minMax1">2600-3200</div>
+        <div class="top-cell orange-box" id="pesoMedio1">2.487</div>
+        <div class="top-cell time" id="time1">00:00</div>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-title" id="kg5_1">5 m: 0 kg/h</div>
+          <div class="progress-track">
+            <div class="progress-fill" id="bar5_1"></div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-title" id="kg25_1">25 m: 0 kg/h</div>
+          <div class="progress-track">
+            <div class="progress-fill" id="bar25_1"></div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-title" id="kg60_1">1 h: 0 kg/h</div>
+          <div class="progress-track">
+            <div class="progress-fill" id="bar60_1"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-zone">
+        <canvas id="chart1"></canvas>
+      </div>
+    </section>
+
+    <!-- LINEA 2 -->
+    <section class="line-panel line2">
+      <div class="top-row">
+        <div class="top-cell article" id="articleName2">Perfil Estructural HEA-200 Kg</div>
+        <div class="top-cell" id="minMax2">1800-2400</div>
+        <div class="top-cell orange-box" id="pesoMedio2">1.732</div>
+        <div class="top-cell time" id="time2">00:00</div>
+      </div>
+
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-title" id="kg5_2">5 m: 0 kg/h</div>
+          <div class="progress-track">
+            <div class="progress-fill" id="bar5_2"></div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-title" id="kg25_2">25 m: 0 kg/h</div>
+          <div class="progress-track">
+            <div class="progress-fill" id="bar25_2"></div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-title" id="kg60_2">1 h: 0 kg/h</div>
+          <div class="progress-track">
+            <div class="progress-fill" id="bar60_2"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-zone">
+        <canvas id="chart2"></canvas>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="demo-badge">DEMO HTML · Datos simulados · GitHub Pages</div>
+
+  <script>
+    const REFRESH_SECONDS = 11;
+
+    /*
+      MÁS PUNTOS:
+      180 puntos x 11 segundos = 1980 segundos = 33 minutos aprox.
+      Si quieres todavía más, puedes subirlo a 240 o 300.
+    */
+    const MAX_POINTS = 180;
+
+    const BLUE_LINE_COLOR = "#001eff";
+    const BLUE_LINE_FILL = "rgba(0, 30, 255, 0.24)";
+    const BLUE_POINT_COLOR = "#001eff";
+
+    const lines = [
+      {
+        id: 1,
+        article: "Bobina Acero S355 Kg",
+        min: 2600,
+        max: 3200,
+        pesoMedio: 2.487,
+        base: 2900,
+        volatility: 260,
+        chartId: "chart1",
+        chart: null,
+        labels: [],
+        values: []
+      },
+      {
+        id: 2,
+        article: "Perfil Estructural HEA-200 Kg",
+        min: 1800,
+        max: 2400,
+        pesoMedio: 1.732,
+        base: 2100,
+        volatility: 220,
+        chartId: "chart2",
+        chart: null,
+        labels: [],
+        values: []
+      }
+    ];
+
+    function pad2(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function formatTime(date) {
+      return pad2(date.getHours()) + ":" + pad2(date.getMinutes()) + ":" + pad2(date.getSeconds());
+    }
+
+    function formatShortTime(date) {
+      return pad2(date.getHours()) + ":" + pad2(date.getMinutes()) + ":" + pad2(date.getSeconds());
+    }
+
+    function randomBetween(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function averageLast(values, count) {
+      const slice = values.slice(Math.max(0, values.length - count));
+
+      if (slice.length === 0) {
+        return 0;
+      }
+
+      const total = slice.reduce((acc, value) => acc + value, 0);
+      return total / slice.length;
+    }
+
+    function generateValue(line, index) {
+      const wave = Math.sin(index / 3) * line.volatility * 0.55;
+      const wave2 = Math.cos(index / 7) * line.volatility * 0.25;
+      const wave3 = Math.sin(index / 13) * line.volatility * 0.18;
+      const noise = randomBetween(-line.volatility, line.volatility);
+
+      let value = line.base + wave + wave2 + wave3 + noise;
+
+      if (index % 17 === 0) {
+        value -= line.volatility * 1.4;
+      }
+
+      if (index % 29 === 0) {
+        value += line.volatility * 1.2;
+      }
+
+      if (index % 43 === 0) {
+        value -= line.volatility * 0.8;
+      }
+
+      return Math.round(clamp(value, line.min * 0.78, line.max * 1.18));
+    }
+
+    function getBarColor(value, line) {
+      if (value < line.min) {
+        return "#ff0000";
+      }
+
+      if (value > line.max) {
+        return "#ff8c00";
+      }
+
+      return "#00e525";
+    }
+
+    function getPercent(value, line) {
+      const percent = (value / line.max) * 100;
+      return clamp(percent, 0, 100);
+    }
+
+    function updateMetric(line, minutes, value) {
+      const id = line.id;
+      const label = minutes === 60 ? "1 h" : minutes + " m";
+
+      document.getElementById("kg" + minutes + "_" + id).textContent =
+        label + ": " + Math.round(value) + " kg/h";
+
+      const bar = document.getElementById("bar" + minutes + "_" + id);
+      bar.style.width = getPercent(value, line) + "%";
+      bar.style.background = getBarColor(value, line);
+    }
+
+    function updateHeader(line) {
+      document.getElementById("articleName" + line.id).textContent = line.article;
+      document.getElementById("minMax" + line.id).textContent = line.min + "-" + line.max;
+      document.getElementById("pesoMedio" + line.id).textContent = line.pesoMedio.toFixed(3);
+      document.getElementById("time" + line.id).textContent = formatTime(new Date());
+    }
+
+    function updateMetrics(line) {
+      const points5 = Math.round((5 * 60) / REFRESH_SECONDS);
+      const points25 = Math.round((25 * 60) / REFRESH_SECONDS);
+      const points60 = Math.round((60 * 60) / REFRESH_SECONDS);
+
+      const kg5 = averageLast(line.values, points5);
+      const kg25 = averageLast(line.values, points25);
+      const kg60 = averageLast(line.values, points60);
+
+      updateMetric(line, 5, kg5);
+      updateMetric(line, 25, kg25);
+      updateMetric(line, 60, kg60);
+    }
+
+    const backgroundZonesPlugin = {
+      id: "backgroundZonesPlugin",
+      beforeDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        const chartArea = chart.chartArea;
+        const y = chart.scales.y;
+        const line = chart.config.options.customLine;
+
+        const top = chartArea.top;
+        const bottom = chartArea.bottom;
+        const left = chartArea.left;
+        const right = chartArea.right;
+        const width = right - left;
+
+        const yMin = y.getPixelForValue(line.min);
+        const yMax = y.getPixelForValue(line.max);
+
+        ctx.save();
+
+        ctx.fillStyle = "rgba(255, 125, 0, 0.17)";
+        ctx.fillRect(left, top, width, Math.max(0, yMax - top));
+
+        ctx.fillStyle = "rgba(0, 180, 0, 0.20)";
+        ctx.fillRect(left, yMax, width, Math.max(0, yMin - yMax));
+
+        ctx.fillStyle = "rgba(255, 0, 0, 0.16)";
+        ctx.fillRect(left, yMin, width, Math.max(0, bottom - yMin));
+
+        ctx.restore();
+      }
+    };
+
+    Chart.register(backgroundZonesPlugin);
+
+    function createChart(line) {
+      const ctx = document.getElementById(line.chartId);
+
+      return new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: line.labels,
+          datasets: [
+            {
+              label: line.article + " · Ritmo real kg/h",
+              data: line.values,
+
+              /*
+                LÍNEA AZUL MÁS SATURADA Y MÁS VISIBLE
+              */
+              borderWidth: 6,
+              borderColor: BLUE_LINE_COLOR,
+              backgroundColor: BLUE_LINE_FILL,
+              fill: false,
+
+              /*
+                MÁS PUNTOS VISIBLES
+              */
+              pointRadius: 2.2,
+              pointHoverRadius: 5,
+              pointBorderWidth: 0,
+              pointBackgroundColor: BLUE_POINT_COLOR,
+              pointBorderColor: BLUE_POINT_COLOR,
+
+              /*
+                Menos suavizado para que se vean mejor los cambios industriales
+              */
+              tension: 0.18
+            },
+            {
+              label: "Mínimo " + line.min + " kg/h",
+              data: line.labels.map(() => line.min),
+              borderWidth: 4,
+              borderColor: "#ff0000",
+              backgroundColor: "rgba(255, 0, 0, 0.10)",
+              pointRadius: 0,
+              tension: 0
+            },
+            {
+              label: "Máximo " + line.max + " kg/h",
+              data: line.labels.map(() => line.max),
+              borderWidth: 4,
+              borderColor: "#008000",
+              backgroundColor: "rgba(0, 128, 0, 0.10)",
+              pointRadius: 0,
+              tension: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: {
+            duration: 350
+          },
+          customLine: line,
+          interaction: {
+            mode: "index",
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: "top",
+              labels: {
+                boxWidth: 36,
+                font: {
+                  size: 10,
+                  weight: "bold"
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  return context.dataset.label + ": " + Math.round(context.parsed.y) + " kg/h";
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                color: "rgba(0,0,0,0.07)"
+              },
+              ticks: {
+                maxTicksLimit: 18,
+                autoSkip: true,
+                maxRotation: 0,
+                minRotation: 0,
+                font: {
+                  size: 10
+                }
+              }
+            },
+            y: {
+              min: Math.round(line.min * 0.78),
+              max: Math.round(line.max * 1.18),
+              title: {
+                display: true,
+                text: "KG/H",
+                font: {
+                  size: 11,
+                  weight: "bold"
+                }
+              },
+              grid: {
+                color: "rgba(0,0,0,0.09)"
+              },
+              ticks: {
+                font: {
+                  size: 10
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function refreshLimitDatasets(line) {
+      line.chart.data.datasets[1].data = line.labels.map(() => line.min);
+      line.chart.data.datasets[2].data = line.labels.map(() => line.max);
+    }
+
+    function addPoint(line) {
+      const now = new Date();
+      const nextIndex = line.values.length + 1;
+      const value = generateValue(line, nextIndex);
+
+      line.labels.push(formatShortTime(now));
+      line.values.push(value);
+
+      if (line.labels.length > MAX_POINTS) {
+        line.labels.shift();
+        line.values.shift();
+      }
+
+      refreshLimitDatasets(line);
+
+      line.chart.update();
+
+      updateHeader(line);
+      updateMetrics(line);
+    }
+
+    function seedInitialData(line) {
+      const now = new Date();
+
+      for (let i = MAX_POINTS - 1; i >= 0; i--) {
+        const date = new Date(now.getTime() - i * REFRESH_SECONDS * 1000);
+        const index = MAX_POINTS - i;
+
+        line.labels.push(formatShortTime(date));
+        line.values.push(generateValue(line, index));
+      }
+    }
+
+    function boot() {
+      lines.forEach(line => {
+        seedInitialData(line);
+        updateHeader(line);
+
+        line.chart = createChart(line);
+
+        refreshLimitDatasets(line);
+        updateMetrics(line);
+      });
+
+      setInterval(() => {
+        lines.forEach(line => addPoint(line));
+      }, REFRESH_SECONDS * 1000);
+
+      setInterval(() => {
+        lines.forEach(line => updateHeader(line));
+      }, 1000);
+    }
+
+    boot();
+  </script>
+</body>
+</html>
