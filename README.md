@@ -1,7 +1,7 @@
 ### Ritmo de producción industrial en tiempo real
 
 <a href="https://suzdalenko-dev.github.io/suzdalenko-dev/2.0-Ritmo-produccion-online/">
-  <img src="https://suzdalenko-dev.github.io/suzdalenko-dev/2.0-Ritmo-produccion-online/ritmo-produccion-online.png" alt="Producción Industrial en Linea | Suzdalenko Programación IA | Ca | Euskadi País Vasco San Sebastian | Automatización en la industria" width="900">
+  <img src="https://suzdalenko-dev.github.io/suzdalenko-dev/2.0-Ritmo-produccion-online/ritmo-produccion-online.png" alt="Producción Industrial en Linea | Suzdalenko Panel Industrial | Pantalla Industrial  | Euskadi País Vasco San Sebastian | Automatización en la industria" width="900">
 </a>
 
 <br>
