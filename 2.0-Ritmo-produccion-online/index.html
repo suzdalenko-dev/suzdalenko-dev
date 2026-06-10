@@ -14,6 +14,25 @@
       box-sizing: border-box;
     }
 
+    :root {
+      --bg-page: #101820;
+      --panel-bg: #f3f6f8;
+      --panel-bg-soft: #e7edf2;
+      --steel-dark: #1f2a33;
+      --steel: #344552;
+      --steel-soft: #d7dee4;
+      --blue-industrial: #0f4c81;
+      --blue-industrial-dark: #0a355d;
+      --blue-line: #1769aa;
+      --cyan-point: #2f9ed8;
+      --green-ok: #2e7d32;
+      --amber-alert: #c77800;
+      --red-low: #b3261e;
+      --text-dark: #111827;
+      --text-muted: #52616d;
+      --white: #ffffff;
+    }
+
     html,
     body {
       width: 100%;
@@ -21,12 +40,15 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: radial-gradient(circle at top left, #fff1a8 0%, #ff5f8f 28%, #4c1d95 62%, #07111f 100%);
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0 25%, transparent 25% 50%, rgba(255, 255, 255, 0.04) 50% 75%, transparent 75%),
+        linear-gradient(180deg, #17212b 0%, #0f1720 100%);
+      background-size: 34px 34px, auto;
       font-family: Arial, Helvetica, sans-serif;
     }
 
     body {
-      color: #111;
+      color: var(--text-dark);
     }
 
     .dashboard {
@@ -34,38 +56,31 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
+      border: 8px solid #111820;
+      background: #111820;
     }
 
     .line-panel {
       width: 100%;
       height: 50vh;
-      border-bottom: 6px solid #111827;
+      border-bottom: 7px solid #101820;
       display: flex;
       flex-direction: column;
-      background: linear-gradient(135deg, #ffffff 0%, #fff7ed 45%, #e0f2fe 100%);
+      background: linear-gradient(180deg, var(--panel-bg) 0%, var(--panel-bg-soft) 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
     }
 
     .line-panel:last-child {
       border-bottom: none;
     }
 
-    .line-panel {
-      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
-    }
-
-    .top-cell.orange-box {
-      box-shadow: 0 0 18px rgba(255, 0, 110, 0.45);
-      color: #ffffff !important;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
-    }
-
     .top-row {
-      height: 48px;
+      height: 50px;
       display: grid;
       grid-template-columns: 28% 22% 25% 25%;
       align-items: center;
-      background: linear-gradient(135deg, #ffffff 0%, #fff7ed 45%, #e0f2fe 100%);
-      border-bottom: 2px solid #d4d4d4;
+      background: linear-gradient(180deg, #f8fafc 0%, #e4ebf1 100%);
+      border-bottom: 2px solid #aeb8c2;
       font-family: "Arial Black", Arial, sans-serif;
       line-height: 1;
     }
@@ -75,43 +90,53 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(20px, 2.3vw, 42px);
+      font-size: clamp(20px, 2.25vw, 40px);
       font-weight: 900;
-      color: #000;
+      color: var(--text-dark);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       padding: 0 8px;
+      border-right: 1px solid rgba(52, 69, 82, 0.22);
+    }
+
+    .top-cell:last-child {
+      border-right: none;
     }
 
     .top-cell.article {
       justify-content: flex-start;
       padding-left: 22px;
+      color: #0b263d;
+    }
+
+    .top-cell.range {
+      color: var(--steel-dark);
     }
 
     .top-cell.orange-box {
-      background: linear-gradient(135deg, #ff9f1c 0%, #ff006e 100%);
-      color: #111;
-      margin: 4px 26px;
+      background: linear-gradient(180deg, #f2a93b 0%, #c77800 100%);
+      color: #111827;
+      margin: 5px 26px;
       height: 40px;
-      border-radius: 2px;
+      border-radius: 3px;
+      border: 1px solid rgba(82, 54, 0, 0.35);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
     }
 
     .top-cell.time {
       justify-content: flex-end;
       padding-right: 20px;
+      color: #0b263d;
+      font-variant-numeric: tabular-nums;
     }
 
     .metrics-row {
-      height: 58px;
-      background: linear-gradient(90deg, #0014ff 0%, #7b2cff 42%, #ff006e 100%);
+      height: 62px;
+      background: linear-gradient(180deg, var(--blue-industrial) 0%, var(--blue-industrial-dark) 100%);
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      border-bottom: 3px solid #17243a;
-    }
-
-    .line2 .metrics-row {
-      background: linear-gradient(90deg, #0014ff 0%, #7b2cff 42%, #ff006e 100%);
+      border-bottom: 3px solid #101820;
     }
 
     .metric-card {
@@ -119,41 +144,51 @@
       flex-direction: column;
       justify-content: center;
       padding: 0 14px;
-      color: #fff;
+      color: var(--white);
       font-family: "Arial Black", Arial, sans-serif;
       font-weight: 900;
       overflow: hidden;
+      border-right: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .metric-card:last-child {
+      border-right: none;
     }
 
     .metric-title {
       text-align: center;
-      font-size: clamp(22px, 2.7vw, 48px);
+      font-size: clamp(22px, 2.55vw, 46px);
       line-height: 1;
       white-space: nowrap;
+      text-shadow: 0 2px 3px rgba(0, 0, 0, 0.28);
+      font-variant-numeric: tabular-nums;
     }
 
     .progress-track {
       width: 100%;
-      height: 7px;
+      height: 8px;
       margin-top: 8px;
       background: rgba(255, 255, 255, 0.82);
-      border-radius: 5px;
+      border-radius: 2px;
       overflow: hidden;
+      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.28);
     }
 
     .progress-fill {
       height: 100%;
       width: 0%;
-      background: #7fbf7b;
-      transition: width 500ms linear, background 500ms linear;
+      background: var(--green-ok);
+      transition: width 450ms linear, background 450ms linear;
     }
 
     .chart-zone {
       flex: 1;
       width: 100%;
       min-height: 0;
-      padding: 4px 12px 8px 12px;
-      background: linear-gradient(180deg, #fff7ed 0%, #ecfeff 52%, #fdf2f8 100%);
+      padding: 6px 14px 10px 14px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(240, 244, 248, 0.96) 100%),
+        repeating-linear-gradient(90deg, transparent 0 28px, rgba(15, 76, 129, 0.04) 28px 29px);
     }
 
     .chart-zone canvas {
@@ -162,46 +197,33 @@
       display: block;
     }
 
-    .top-cell.orange-box {
-      color: #ffffff;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
-      box-shadow: 0 0 18px rgba(255, 0, 110, 0.45);
-    }
-
-    .metric-title {
-      text-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
-    }
-
-    .progress-track {
-      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.28);
-    }
-
-    .progress-fill {
-      box-shadow: 0 0 12px currentColor;
-    }
-
     .demo-badge {
       position: fixed;
-      right: 10px;
-      bottom: 8px;
+      right: 12px;
+      bottom: 10px;
       z-index: 50;
-      padding: 5px 10px;
-      background: rgba(0, 0, 0, 0.55);
+      padding: 6px 11px;
+      background: rgba(15, 24, 32, 0.82);
       color: white;
       font-size: 12px;
-      border-radius: 4px;
+      border-radius: 3px;
       font-weight: 700;
       letter-spacing: .3px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
     }
 
     @media (max-width: 900px) {
+      .dashboard {
+        border-width: 4px;
+      }
+
       .top-row {
-        height: 42px;
+        height: 44px;
         grid-template-columns: 35% 22% 20% 23%;
       }
 
       .metrics-row {
-        height: 50px;
+        height: 54px;
       }
 
       .top-cell.article {
@@ -222,7 +244,7 @@
     <section class="line-panel line1">
       <div class="top-row">
         <div class="top-cell article" id="articleName1">Bobina Acero S355 Kg</div>
-        <div class="top-cell" id="minMax1">2600-3200</div>
+        <div class="top-cell range" id="minMax1">2600-3200</div>
         <div class="top-cell orange-box" id="pesoMedio1">2.487</div>
         <div class="top-cell time" id="time1">00:00</div>
       </div>
@@ -259,7 +281,7 @@
     <section class="line-panel line2">
       <div class="top-row">
         <div class="top-cell article" id="articleName2">Perfil Estructural HEA-200 Kg</div>
-        <div class="top-cell" id="minMax2">1800-2400</div>
+        <div class="top-cell range" id="minMax2">1800-2400</div>
         <div class="top-cell orange-box" id="pesoMedio2">1.732</div>
         <div class="top-cell time" id="time2">00:00</div>
       </div>
@@ -294,29 +316,33 @@
 
   </main>
 
-  <div class="demo-badge">DEMO HTML · Datos simulados · GitHub Pages</div>
+  <div class="demo-badge">DEMO INDUSTRIAL · Datos simulados · GitHub Pages</div>
 
   <script>
     const REFRESH_SECONDS = 5;
 
     /*
-      180 puntos x 11 segundos = 1980 segundos = 33 minutos aprox.
-      Para más histórico visible puedes subirlo a 240 o 300.
+      260 puntos x 5 segundos = 21,6 minutos aprox.
+      Pantalla dinámica, pero con estética industrial seria.
     */
     const MAX_POINTS = 260;
 
     /*
-      PALETA MÁS SUAVE PARA EL GRÁFICO
+      Colores industriales:
+      - azul: ritmo real
+      - rojo: mínimo
+      - verde: máximo / zona OK
+      - ámbar: sobre-rendimiento o aviso
     */
-    const BLUE_LINE_COLOR = "#0057ff";
-    const BLUE_POINT_COLOR = "#00d4ff";
+    const BLUE_LINE_COLOR = "#1769aa";
+    const BLUE_POINT_COLOR = "#2f9ed8";
 
-    const MIN_LINE_COLOR = "#ff1744";
-    const MAX_LINE_COLOR = "#00c853";
+    const MIN_LINE_COLOR = "#b3261e";
+    const MAX_LINE_COLOR = "#2e7d32";
 
-    const GOOD_BAR_COLOR = "#00e676";
-    const LOW_BAR_COLOR = "#ff1744";
-    const HIGH_BAR_COLOR = "#ff9100";
+    const GOOD_BAR_COLOR = "#2e7d32";
+    const LOW_BAR_COLOR = "#b3261e";
+    const HIGH_BAR_COLOR = "#c77800";
 
     const lines = [
       {
@@ -326,7 +352,7 @@
         max: 3200,
         pesoMedio: 2.487,
         base: 2900,
-        volatility: 520,
+        volatility: 420,
         chartId: "chart1",
         chart: null,
         labels: [],
@@ -339,7 +365,7 @@
         max: 2400,
         pesoMedio: 1.732,
         base: 2100,
-        volatility: 460,
+        volatility: 370,
         chartId: "chart2",
         chart: null,
         labels: [],
@@ -380,38 +406,37 @@
 
     function generateValue(line, index) {
       /*
-        Ritmo más "loco":
-        - ondas más rápidas
-        - ruido más fuerte
-        - microparadas
-        - acelerones bruscos
-        - alguna recuperación artificial para que parezca una línea viva
+        Ritmo industrial vivo, pero creíble:
+        - variaciones rápidas de producción
+        - pequeñas microparadas
+        - aceleraciones puntuales
+        - sin estética exagerada
       */
-      const wave = Math.sin(index / 1.8) * line.volatility * 0.95;
-      const wave2 = Math.cos(index / 4.4) * line.volatility * 0.65;
-      const wave3 = Math.sin(index / 9.5) * line.volatility * 0.45;
-      const microVibration = Math.sin(index * 2.7) * line.volatility * 0.22;
-      const noise = randomBetween(-line.volatility * 1.35, line.volatility * 1.35);
+      const wave = Math.sin(index / 2.2) * line.volatility * 0.72;
+      const wave2 = Math.cos(index / 5.2) * line.volatility * 0.42;
+      const wave3 = Math.sin(index / 11.5) * line.volatility * 0.28;
+      const microVibration = Math.sin(index * 2.15) * line.volatility * 0.12;
+      const noise = randomBetween(-line.volatility * 0.82, line.volatility * 0.82);
 
       let value = line.base + wave + wave2 + wave3 + microVibration + noise;
 
-      if (index % 11 === 0) {
-        value -= line.volatility * randomBetween(1.4, 2.4);
+      if (index % 13 === 0) {
+        value -= line.volatility * randomBetween(0.9, 1.6);
       }
 
-      if (index % 19 === 0) {
-        value += line.volatility * randomBetween(1.3, 2.3);
+      if (index % 23 === 0) {
+        value += line.volatility * randomBetween(0.8, 1.5);
       }
 
-      if (index % 31 === 0) {
-        value -= line.volatility * randomBetween(0.9, 1.8);
+      if (index % 41 === 0) {
+        value -= line.volatility * randomBetween(0.6, 1.2);
       }
 
-      if (index % 47 === 0) {
-        value += line.volatility * randomBetween(1.8, 2.8);
+      if (index % 53 === 0) {
+        value += line.volatility * randomBetween(1.0, 1.8);
       }
 
-      return Math.round(clamp(value, line.min * 0.55, line.max * 1.48));
+      return Math.round(clamp(value, line.min * 0.64, line.max * 1.34));
     }
 
     function getBarColor(value, line) {
@@ -484,18 +509,18 @@
         ctx.save();
 
         /*
-          ZONAS MUY SUAVES:
-          - superior: naranja muy claro
-          - zona correcta: verde muy claro
-          - inferior: rojo muy claro
+          Zonas de control industrial:
+          - Superior: ámbar suave
+          - Dentro de objetivo: verde técnico
+          - Inferior: rojo suave
         */
-        ctx.fillStyle = "rgba(255, 145, 0, 0.16)";
+        ctx.fillStyle = "rgba(199, 120, 0, 0.095)";
         ctx.fillRect(left, top, width, Math.max(0, yMax - top));
 
-        ctx.fillStyle = "rgba(0, 230, 118, 0.16)";
+        ctx.fillStyle = "rgba(46, 125, 50, 0.105)";
         ctx.fillRect(left, yMax, width, Math.max(0, yMin - yMax));
 
-        ctx.fillStyle = "rgba(255, 23, 68, 0.12)";
+        ctx.fillStyle = "rgba(179, 38, 30, 0.085)";
         ctx.fillRect(left, yMin, width, Math.max(0, bottom - yMin));
 
         ctx.restore();
@@ -515,32 +540,23 @@
             {
               label: line.article + " · Ritmo real kg/h",
               data: line.values,
-
-              /*
-                Línea azul visible, pero menos agresiva.
-              */
-              borderWidth: 5,
+              borderWidth: 4,
               borderColor: BLUE_LINE_COLOR,
-              backgroundColor: "rgba(0, 87, 255, 0.13)",
+              backgroundColor: "rgba(23, 105, 170, 0.10)",
               fill: true,
-
-              /*
-                Muchos puntos, pero con color más suave.
-              */
-              pointRadius: 2.7,
+              pointRadius: 1.9,
               pointHoverRadius: 4,
               pointBorderWidth: 0,
               pointBackgroundColor: BLUE_POINT_COLOR,
               pointBorderColor: BLUE_POINT_COLOR,
-
-              tension: 0.28
+              tension: 0.23
             },
             {
               label: "Mínimo " + line.min + " kg/h",
               data: line.labels.map(() => line.min),
               borderWidth: 3,
               borderColor: MIN_LINE_COLOR,
-              backgroundColor: "rgba(201, 130, 130, 0.05)",
+              backgroundColor: "rgba(179, 38, 30, 0.05)",
               pointRadius: 0,
               tension: 0
             },
@@ -549,7 +565,7 @@
               data: line.labels.map(() => line.max),
               borderWidth: 3,
               borderColor: MAX_LINE_COLOR,
-              backgroundColor: "rgba(124, 174, 122, 0.05)",
+              backgroundColor: "rgba(46, 125, 50, 0.05)",
               pointRadius: 0,
               tension: 0
             }
@@ -559,7 +575,7 @@
           responsive: true,
           maintainAspectRatio: false,
           animation: {
-            duration: 350
+            duration: 320
           },
           customLine: line,
           interaction: {
@@ -572,7 +588,7 @@
               position: "top",
               labels: {
                 boxWidth: 36,
-                color: "#111827",
+                color: "#1f2a33",
                 font: {
                   size: 10,
                   weight: "bold"
@@ -580,7 +596,7 @@
               }
             },
             tooltip: {
-              backgroundColor: "rgba(31, 41, 55, 0.92)",
+              backgroundColor: "rgba(15, 24, 32, 0.94)",
               titleColor: "#ffffff",
               bodyColor: "#ffffff",
               callbacks: {
@@ -593,10 +609,10 @@
           scales: {
             x: {
               grid: {
-                color: "rgba(0, 0, 0, 0.045)"
+                color: "rgba(52, 69, 82, 0.075)"
               },
               ticks: {
-                color: "#111827",
+                color: "#52616d",
                 maxTicksLimit: 18,
                 autoSkip: true,
                 maxRotation: 0,
@@ -607,22 +623,22 @@
               }
             },
             y: {
-              min: Math.round(line.min * 0.55),
-              max: Math.round(line.max * 1.48),
+              min: Math.round(line.min * 0.64),
+              max: Math.round(line.max * 1.34),
               title: {
                 display: true,
                 text: "KG/H",
-                color: "#111827",
+                color: "#344552",
                 font: {
                   size: 11,
                   weight: "bold"
                 }
               },
               grid: {
-                color: "rgba(0, 0, 0, 0.055)"
+                color: "rgba(52, 69, 82, 0.095)"
               },
               ticks: {
-                color: "#111827",
+                color: "#52616d",
                 font: {
                   size: 10
                 }
