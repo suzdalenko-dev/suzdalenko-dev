@@ -1,6 +1,6 @@
-
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -122,6 +122,9 @@
       border-radius: 3px;
       border: 1px solid rgba(82, 54, 0, 0.35);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      background: linear-gradient(180deg, #43a047 0%, #2e7d32 100%);
+      color: #ffffff;
+      border: 1px solid rgba(20, 83, 45, 0.65);
     }
 
     .top-cell.time {
@@ -334,15 +337,15 @@
       - verde: máximo / zona OK
       - ámbar: sobre-rendimiento o aviso
     */
-    const BLUE_LINE_COLOR = "#1769aa";
-    const BLUE_POINT_COLOR = "#2f9ed8";
+    const BLUE_LINE_COLOR = "#083be1";
+    const BLUE_POINT_COLOR = "#083be1";
 
-    const MIN_LINE_COLOR = "#b3261e";
-    const MAX_LINE_COLOR = "#2e7d32";
+    const MIN_LINE_COLOR = "#2e7d32";
+    const MAX_LINE_COLOR = "#b3261e";
 
     const GOOD_BAR_COLOR = "#2e7d32";
     const LOW_BAR_COLOR = "#b3261e";
-    const HIGH_BAR_COLOR = "#c77800";
+    const HIGH_BAR_COLOR = "#000000";
 
     const lines = [
       {
@@ -514,7 +517,7 @@
           - Dentro de objetivo: verde técnico
           - Inferior: rojo suave
         */
-        ctx.fillStyle = "rgba(199, 120, 0, 0.095)";
+        ctx.fillStyle = "#ffffff";
         ctx.fillRect(left, top, width, Math.max(0, yMax - top));
 
         ctx.fillStyle = "rgba(46, 125, 50, 0.105)";
@@ -554,7 +557,7 @@
             {
               label: "Mínimo " + line.min + " kg/h",
               data: line.labels.map(() => line.min),
-              borderWidth: 3,
+              borderWidth: 1,
               borderColor: MIN_LINE_COLOR,
               backgroundColor: "rgba(179, 38, 30, 0.05)",
               pointRadius: 0,
@@ -563,7 +566,7 @@
             {
               label: "Máximo " + line.max + " kg/h",
               data: line.labels.map(() => line.max),
-              borderWidth: 3,
+              borderWidth: 1,
               borderColor: MAX_LINE_COLOR,
               backgroundColor: "rgba(46, 125, 50, 0.05)",
               pointRadius: 0,
@@ -710,4 +713,5 @@
     boot();
   </script>
 </body>
+
 </html>
