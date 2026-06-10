@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="es">
 <head>
@@ -20,7 +21,7 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: #f4f4f4;
+      background: radial-gradient(circle at top left, #fff1a8 0%, #ff5f8f 28%, #4c1d95 62%, #07111f 100%);
       font-family: Arial, Helvetica, sans-serif;
     }
 
@@ -38,14 +39,24 @@
     .line-panel {
       width: 100%;
       height: 50vh;
-      border-bottom: 5px solid #1f2937;
+      border-bottom: 6px solid #111827;
       display: flex;
       flex-direction: column;
-      background: #ffffff;
+      background: linear-gradient(135deg, #ffffff 0%, #fff7ed 45%, #e0f2fe 100%);
     }
 
     .line-panel:last-child {
       border-bottom: none;
+    }
+
+    .line-panel {
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+    }
+
+    .top-cell.orange-box {
+      box-shadow: 0 0 18px rgba(255, 0, 110, 0.45);
+      color: #ffffff !important;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
     }
 
     .top-row {
@@ -53,7 +64,7 @@
       display: grid;
       grid-template-columns: 28% 22% 25% 25%;
       align-items: center;
-      background: #ffffff;
+      background: linear-gradient(135deg, #ffffff 0%, #fff7ed 45%, #e0f2fe 100%);
       border-bottom: 2px solid #d4d4d4;
       font-family: "Arial Black", Arial, sans-serif;
       line-height: 1;
@@ -79,7 +90,7 @@
     }
 
     .top-cell.orange-box {
-      background: #f4a261;
+      background: linear-gradient(135deg, #ff9f1c 0%, #ff006e 100%);
       color: #111;
       margin: 4px 26px;
       height: 40px;
@@ -93,14 +104,14 @@
 
     .metrics-row {
       height: 58px;
-      background: #012e6c;
+      background: linear-gradient(90deg, #0014ff 0%, #7b2cff 42%, #ff006e 100%);
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       border-bottom: 3px solid #17243a;
     }
 
     .line2 .metrics-row {
-      background: #012e6c;
+      background: linear-gradient(90deg, #0014ff 0%, #7b2cff 42%, #ff006e 100%);
     }
 
     .metric-card {
@@ -142,13 +153,31 @@
       width: 100%;
       min-height: 0;
       padding: 4px 12px 8px 12px;
-      background: #f8f5ef;
+      background: linear-gradient(180deg, #fff7ed 0%, #ecfeff 52%, #fdf2f8 100%);
     }
 
     .chart-zone canvas {
       width: 100% !important;
       height: 100% !important;
       display: block;
+    }
+
+    .top-cell.orange-box {
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 0 18px rgba(255, 0, 110, 0.45);
+    }
+
+    .metric-title {
+      text-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+    }
+
+    .progress-track {
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.28);
+    }
+
+    .progress-fill {
+      box-shadow: 0 0 12px currentColor;
     }
 
     .demo-badge {
@@ -268,26 +297,26 @@
   <div class="demo-badge">DEMO HTML · Datos simulados · GitHub Pages</div>
 
   <script>
-    const REFRESH_SECONDS = 11;
+    const REFRESH_SECONDS = 5;
 
     /*
       180 puntos x 11 segundos = 1980 segundos = 33 minutos aprox.
       Para más histórico visible puedes subirlo a 240 o 300.
     */
-    const MAX_POINTS = 180;
+    const MAX_POINTS = 260;
 
     /*
       PALETA MÁS SUAVE PARA EL GRÁFICO
     */
-    const BLUE_LINE_COLOR = "#064398";
-    const BLUE_POINT_COLOR = "#064398";
+    const BLUE_LINE_COLOR = "#0057ff";
+    const BLUE_POINT_COLOR = "#00d4ff";
 
-    const MIN_LINE_COLOR = "#c98282";
-    const MAX_LINE_COLOR = "#7cae7a";
+    const MIN_LINE_COLOR = "#ff1744";
+    const MAX_LINE_COLOR = "#00c853";
 
-    const GOOD_BAR_COLOR = "#8ecf8a";
-    const LOW_BAR_COLOR = "#d98b8b";
-    const HIGH_BAR_COLOR = "#e0b06f";
+    const GOOD_BAR_COLOR = "#00e676";
+    const LOW_BAR_COLOR = "#ff1744";
+    const HIGH_BAR_COLOR = "#ff9100";
 
     const lines = [
       {
@@ -297,7 +326,7 @@
         max: 3200,
         pesoMedio: 2.487,
         base: 2900,
-        volatility: 260,
+        volatility: 520,
         chartId: "chart1",
         chart: null,
         labels: [],
@@ -310,7 +339,7 @@
         max: 2400,
         pesoMedio: 1.732,
         base: 2100,
-        volatility: 220,
+        volatility: 460,
         chartId: "chart2",
         chart: null,
         labels: [],
@@ -350,26 +379,39 @@
     }
 
     function generateValue(line, index) {
-      const wave = Math.sin(index / 3) * line.volatility * 0.55;
-      const wave2 = Math.cos(index / 7) * line.volatility * 0.25;
-      const wave3 = Math.sin(index / 13) * line.volatility * 0.18;
-      const noise = randomBetween(-line.volatility, line.volatility);
+      /*
+        Ritmo más "loco":
+        - ondas más rápidas
+        - ruido más fuerte
+        - microparadas
+        - acelerones bruscos
+        - alguna recuperación artificial para que parezca una línea viva
+      */
+      const wave = Math.sin(index / 1.8) * line.volatility * 0.95;
+      const wave2 = Math.cos(index / 4.4) * line.volatility * 0.65;
+      const wave3 = Math.sin(index / 9.5) * line.volatility * 0.45;
+      const microVibration = Math.sin(index * 2.7) * line.volatility * 0.22;
+      const noise = randomBetween(-line.volatility * 1.35, line.volatility * 1.35);
 
-      let value = line.base + wave + wave2 + wave3 + noise;
+      let value = line.base + wave + wave2 + wave3 + microVibration + noise;
 
-      if (index % 17 === 0) {
-        value -= line.volatility * 1.4;
+      if (index % 11 === 0) {
+        value -= line.volatility * randomBetween(1.4, 2.4);
       }
 
-      if (index % 29 === 0) {
-        value += line.volatility * 1.2;
+      if (index % 19 === 0) {
+        value += line.volatility * randomBetween(1.3, 2.3);
       }
 
-      if (index % 43 === 0) {
-        value -= line.volatility * 0.8;
+      if (index % 31 === 0) {
+        value -= line.volatility * randomBetween(0.9, 1.8);
       }
 
-      return Math.round(clamp(value, line.min * 0.78, line.max * 1.18));
+      if (index % 47 === 0) {
+        value += line.volatility * randomBetween(1.8, 2.8);
+      }
+
+      return Math.round(clamp(value, line.min * 0.55, line.max * 1.48));
     }
 
     function getBarColor(value, line) {
@@ -447,13 +489,13 @@
           - zona correcta: verde muy claro
           - inferior: rojo muy claro
         */
-        ctx.fillStyle = "rgba(224, 176, 111, 0.07)";
+        ctx.fillStyle = "rgba(255, 145, 0, 0.16)";
         ctx.fillRect(left, top, width, Math.max(0, yMax - top));
 
-        ctx.fillStyle = "rgba(142, 207, 138, 0.11)";
+        ctx.fillStyle = "rgba(0, 230, 118, 0.16)";
         ctx.fillRect(left, yMax, width, Math.max(0, yMin - yMax));
 
-        ctx.fillStyle = "rgba(217, 139, 139, 0.07)";
+        ctx.fillStyle = "rgba(255, 23, 68, 0.12)";
         ctx.fillRect(left, yMin, width, Math.max(0, bottom - yMin));
 
         ctx.restore();
@@ -477,21 +519,21 @@
               /*
                 Línea azul visible, pero menos agresiva.
               */
-              borderWidth: 4,
+              borderWidth: 5,
               borderColor: BLUE_LINE_COLOR,
-              backgroundColor: "rgba(63, 111, 168, 0.08)",
-              fill: false,
+              backgroundColor: "rgba(0, 87, 255, 0.13)",
+              fill: true,
 
               /*
                 Muchos puntos, pero con color más suave.
               */
-              pointRadius: 1.8,
+              pointRadius: 2.7,
               pointHoverRadius: 4,
               pointBorderWidth: 0,
               pointBackgroundColor: BLUE_POINT_COLOR,
               pointBorderColor: BLUE_POINT_COLOR,
 
-              tension: 0.18
+              tension: 0.28
             },
             {
               label: "Mínimo " + line.min + " kg/h",
@@ -530,7 +572,7 @@
               position: "top",
               labels: {
                 boxWidth: 36,
-                color: "#4b5563",
+                color: "#111827",
                 font: {
                   size: 10,
                   weight: "bold"
@@ -554,7 +596,7 @@
                 color: "rgba(0, 0, 0, 0.045)"
               },
               ticks: {
-                color: "#6b7280",
+                color: "#111827",
                 maxTicksLimit: 18,
                 autoSkip: true,
                 maxRotation: 0,
@@ -565,12 +607,12 @@
               }
             },
             y: {
-              min: Math.round(line.min * 0.78),
-              max: Math.round(line.max * 1.18),
+              min: Math.round(line.min * 0.55),
+              max: Math.round(line.max * 1.48),
               title: {
                 display: true,
                 text: "KG/H",
-                color: "#6b7280",
+                color: "#111827",
                 font: {
                   size: 11,
                   weight: "bold"
@@ -580,7 +622,7 @@
                 color: "rgba(0, 0, 0, 0.055)"
               },
               ticks: {
-                color: "#6b7280",
+                color: "#111827",
                 font: {
                   size: 10
                 }
