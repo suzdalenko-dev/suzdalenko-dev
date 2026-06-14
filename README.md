@@ -25,3 +25,5 @@
 </a>
 
 [Ver vídeo en YouTube](https://www.youtube.com/watch?v=wdR0ghjMtYw)
+
+Building real-time industrial dashboards, production monitoring systems, Power BI analytics, and backend automations for manufacturing companies.
