@@ -1,0 +1,25 @@
+Proceso Python
+│
+├── hilo principal
+│   └── bucle asyncio
+│       ├── conexión OPC UA
+│       └── escritor JSONL general
+│
+├── hilo de estadísticas
+│   └── escribe stats.json
+│
+├── hilo de PostgreSQL
+│   └── escribe pesadora_lineas
+│
+└── hilo heartbeat
+    └── escribe el estado de conexión+
+
+
+EVENT_QUEUE = asyncio.Queue(maxsize=50_000)
+    Se usa porque su consumidor es una función asíncrona: 
+event = await EVENT_QUEUE.get()
+    El escritor JSONL se ejecuta como una tarea del bucle asyncio.
+
+
+event = await EVENT_QUEUE.get()
+El escritor JSONL se ejecuta como una tarea del bucle asyncio.
