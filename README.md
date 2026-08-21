@@ -1,4 +1,4 @@
-### Desglose de tiempos y ritmos de producción
+### Desglose de tiempos y ritmos de producción (Análisis de tiempos y capacidad de línea)
 <img src="https://suzdalenko-dev.github.io/suzdalenko-dev/prod.png" alt="Desglose de tiempos y ritmos de producción" width="900">
 
 
