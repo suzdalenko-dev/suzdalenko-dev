@@ -1,3 +1,8 @@
+### Desglose de tiempos y ritmos de producción
+<img src="https://suzdalenko-dev.github.io/suzdalenko-dev/prod.png" alt="Desglose de tiempos y ritmos de producción" width="900">
+
+
+
 ### Ritmo de producción industrial en tiempo real
 
 <a href="https://suzdalenko-dev.github.io/suzdalenko-dev/2.0-Ritmo-produccion-online/">
