@@ -1,5 +1,6 @@
 
-<img src="dashboard-opus-enero-marzo.gif" alt="Cuadro de mando financiero Suzdalenko Alexey"  width="900" />
+<img src="g1.jpg" alt="Cuadro de mando financiero Suzdalenko Alexey"  width="900" />
+<img src="g2.jpg" alt="Cuadro de mando financiero Suzdalenko Alexey"  width="900" />
 
 ### Desglose de tiempos y ritmos de producción (Análisis de tiempos y capacidad de línea)
 <img src="https://suzdalenko-dev.github.io/suzdalenko-dev/prod.png" alt="Desglose de tiempos y ritmos de producción" width="900">
