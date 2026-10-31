@@ -34,6 +34,15 @@
   <img src="./1.0-Ritmo-Produccion/ishida.png" alt="Ver vídeo del dashboard de gasto de máquinas | Suzdalenko Developer IA | Bilbao Euskadi País Vasco | Automatización en la industria Suzdalenko " width="900">
 </a>
 
-[Ver vídeo en YouTube](https://www.youtube.com/watch?v=wdR0ghjMtYw)
+<br>
+<br>
+<br>
+
+### DEMO MES
+
+<a href="https://suzdalenko-dev.github.io/suzdalenko-dev/mes1.jpg">
+  <img src="https://suzdalenko-dev.github.io/suzdalenko-dev/mes1.jpg" alt="Monitor de Ritmo de Producción | Suzdalenko Programación IA | Cantabria Santander | Automatización en la industria Suzdalenko" width="900">
+</a>
+
 
 Building real-time industrial dashboards, production monitoring systems, Power BI analytics, and backend automations for manufacturing companies.
