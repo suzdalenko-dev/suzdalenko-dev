@@ -38,7 +38,7 @@
 <br>
 <br>
 
-### DEMO MES
+### Demo MES
 
 <a href="https://suzdalenko-dev.github.io/suzdalenko-dev/mes1.jpg">
   <img src="https://suzdalenko-dev.github.io/suzdalenko-dev/mes1.jpg" alt="Monitor de Ritmo de Producción | Suzdalenko Programación IA | Cantabria Santander | Automatización en la industria Suzdalenko" width="900">
